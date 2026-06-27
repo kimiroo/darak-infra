@@ -24,7 +24,7 @@
     - role: configure_system
 
 - name: Setup LVM Thin volumes on PVE
-  hosts: pve-node
+  hosts: pve_node
   become: true
   vars_files:
     - secrets.yaml
