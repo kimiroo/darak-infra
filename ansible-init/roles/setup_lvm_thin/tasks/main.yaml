@@ -12,6 +12,9 @@
     part_end: 100GiB
     state: present
 
+- name: Nuke partition internal LUKS header
+  ansible.builtin.command: wipefs -a /dev/nvme0n1p1
+
 - name: Create LUKS key directory
   ansible.builtin.file:
     path: /etc/cryptsetup-keys.d
@@ -22,7 +25,7 @@
 
 - name: Generate LUKS keyfile
   ansible.builtin.command:
-    cmd: dd if=/dev/urandom out=/etc/cryptsetup-keys.d/nvme0n1p1.key bs=512 count=8
+    cmd: dd if=/dev/urandom of=/etc/cryptsetup-keys.d/nvme0n1p1.key bs=512 count=8
     creates: /etc/cryptsetup-keys.d/nvme0n1p1.key
 
 - name: Secure keyfile directory permissions

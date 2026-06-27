@@ -1,5 +1,0 @@
----
-- name: Install cryptsetup package
-  ansible.builtin.package:
-    name: cryptsetup
-    state: present

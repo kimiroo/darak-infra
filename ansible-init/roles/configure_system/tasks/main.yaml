@@ -3,4 +3,4 @@
   ansible.builtin.include_tasks: configure_sshd.yaml
 
 - name: Disable Power Buttons
-  ansible.builtin.include_tasks: cryptsetup.yaml
+  ansible.builtin.include_tasks: disable_power_buttons.yaml

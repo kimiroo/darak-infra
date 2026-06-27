@@ -2,5 +2,5 @@
 - name: Update Raspberry Pi Debian mirror
   ansible.builtin.shell: |
     sed -i.bak \
-      -e 's|http://deb.debian.org/debian/|https://mirror.kakao.com/debian|g' \
+      -e 's|http://deb.debian.org/debian/|https://ftp.kaist.ac.kr/debian|g' \
       /etc/apt/sources.list.d/debian.sources

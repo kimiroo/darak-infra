@@ -1,0 +1,7 @@
+---
+- name: Install cryptsetup and parted package
+  ansible.builtin.package:
+    name:
+      - cryptsetup
+      - parted
+    state: present

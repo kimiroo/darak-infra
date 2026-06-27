@@ -7,4 +7,8 @@
     group: root
     mode: '0644'
     validate: /usr/sbin/sshd -t -f %s
-  notify: Restart SSH Service
+
+- name: Restart SSH Service
+  ansible.builtin.systemd:
+    name: "{{ 'ssh' if ansible_facts['os_family'] == 'Debian' else 'sshd' }}"
+    state: restarted

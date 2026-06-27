@@ -1,7 +1,7 @@
 server ntp.kriss.re.kr iburst prefer
 pool kr.pool.ntp.org iburst
 
-{% if ansible_os_family == 'Debian' %}
+{% if ansible_facts['os_family'] == 'Debian' %}
 driftfile /var/lib/chrony/chrony.drift
 {% else %}
 driftfile /var/lib/chrony/drift

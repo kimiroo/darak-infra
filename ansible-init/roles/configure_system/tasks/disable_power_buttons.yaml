@@ -13,4 +13,8 @@
     owner: root
     group: root
     mode: '0644'
-  notify: Restart systemd-logind Service
+
+- name: Restart systemd-logind Service
+  ansible.builtin.systemd:
+    name: systemd-logind
+    state: restarted

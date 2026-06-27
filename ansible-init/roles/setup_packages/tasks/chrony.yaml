@@ -3,27 +3,28 @@
     name: chrony
     state: present
 
-- name: Read systemd services list
-  ansible.builtin.service_facts:
-
 - name: Disable systemd-timesyncd service
   ansible.builtin.systemd:
     name: systemd-timesyncd
     state: stopped
     enabled: false
-  when: "'systemd-timesyncd.service' in ansible_facts.services"
+  ignore_errors: true
 
 - name: Copy Chrony configuration file
   ansible.builtin.template:
     src: chrony.conf.j2
-    dest: "{{ '/etc/chrony/chrony.conf' if ansible_os_family == 'Debian' else '/etc/chrony.conf' }}"
+    dest: "{{ '/etc/chrony/chrony.conf' if ansible_facts['os_family'] == 'Debian' else '/etc/chrony.conf' }}"
     owner: root
     group: root
     mode: '0644'
-  notify: Restart Chrony Service
 
 - name: Ensure Chrony service is running and enabled
   ansible.builtin.systemd:
-    name: "{{ 'chrony' if ansible_os_family == 'Debian' else 'chronyd' }}"
+    name: "{{ 'chrony' if ansible_facts['os_family'] == 'Debian' else 'chronyd' }}"
     state: started
     enabled: true
+
+- name: Restart Chrony Service
+  ansible.builtin.systemd:
+    name: "{{ 'chrony' if ansible_facts['os_family'] == 'Debian' else 'chronyd' }}"
+    state: restarted
