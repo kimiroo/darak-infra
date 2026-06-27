@@ -38,3 +38,9 @@
     - secrets.yaml
   roles:
     - role: nut
+
+- name: Install Docker
+  hosts: pi_node
+  become: true
+  roles:
+    - role: docker
