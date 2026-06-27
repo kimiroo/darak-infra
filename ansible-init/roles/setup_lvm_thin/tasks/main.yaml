@@ -40,6 +40,7 @@
     device: /dev/nvme0n1p1
     passphrase: "{{ luks_passwords[inventory_hostname] }}"
     state: present
+  no_log: true
 
 - name: Add keyfile to LUKS device
   community.crypto.luks_device:
@@ -47,6 +48,7 @@
     passphrase: "{{ luks_passwords[inventory_hostname] }}"
     new_keyfile: /etc/cryptsetup-keys.d/nvme0n1p1.key
     state: present
+  no_log: true
 
 - name: Configure crypttab for automatic unlock
   community.general.crypttab:
