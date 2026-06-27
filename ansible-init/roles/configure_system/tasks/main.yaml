@@ -1,0 +1,6 @@
+---
+- name: Configure sshd
+  ansible.builtin.include_tasks: configure_sshd.yaml
+
+- name: Disable Power Buttons
+  ansible.builtin.include_tasks: cryptsetup.yaml

@@ -1,0 +1,32 @@
+---
+- name: Update system repository source
+  hosts: all
+  become: true
+  roles:
+    - role: update_repo
+
+- name: Update system packages
+  hosts: all
+  become: true
+  roles:
+    - role: update_system
+
+- name: Setup packages
+  hosts: all
+  become: true
+  roles:
+    - role: setup_packages
+
+- name: Configure system configs
+  hosts: all
+  become: true
+  roles:
+    - role: configure_system
+
+- name: Setup LVM Thin volumes on PVE
+  hosts: pve-node
+  become: true
+  vars_files:
+    - secrets.yaml
+  roles:
+    - role: setup_lvm_thin

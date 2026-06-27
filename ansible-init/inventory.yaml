@@ -1,0 +1,29 @@
+all:
+  vars:
+    ansible_ssh_private_key_file: ~/.ssh/id_ed25519_ansible
+    ansible_python_interpreter: /usr/bin/python3
+  children:
+    pve-node:
+      vars:
+        ansible_user: root
+      hosts:
+        pve-node-01:
+          ansible_host: 10.5.46.10
+        pve-node-02:
+          ansible_host: 10.5.46.20
+        pve-node-03:
+          ansible_host: 10.5.46.30
+        pve-node-04:
+          ansible_host: 10.5.46.40
+    file-node:
+      vars:
+        ansible_user: yongj
+      hosts:
+        file-node-01:
+          ansible_host: 10.5.46.50
+    pi-node:
+      vars:
+        ansible_user: yongj
+      hosts:
+        pi-node-01:
+          ansible_host: 10.5.46.60

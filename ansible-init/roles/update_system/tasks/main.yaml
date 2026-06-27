@@ -1,0 +1,8 @@
+---
+- name: System package upgrade (dnf)
+  ansible.builtin.include_tasks: dnf.yaml
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: System package upgrade (apt)
+  ansible.builtin.include_tasks: apt.yaml
+  when: ansible_facts['os_family'] == "Debian"

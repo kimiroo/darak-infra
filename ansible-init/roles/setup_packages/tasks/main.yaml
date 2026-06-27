@@ -1,0 +1,10 @@
+---
+- name: Setup Avahi
+  ansible.builtin.include_tasks: avahi.yaml
+
+- name: Setup Chrony
+  ansible.builtin.include_tasks: chrony.yaml
+
+- name: Install cryptsetup (PVE only)
+  ansible.builtin.include_tasks: cryptsetup.yaml
+  when: "'pve-node' in group_names"

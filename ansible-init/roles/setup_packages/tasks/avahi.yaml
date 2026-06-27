@@ -1,0 +1,16 @@
+- name: Set Avahi package name
+  ansible.builtin.set_fact:
+    avahi_package_name: "{{ 'avahi' if ansible_os_family == 'RedHat' else 'avahi-daemon' }}"
+
+- name: Install Avahi and nss-mdns package
+  ansible.builtin.package:
+    name:
+      - "{{ avahi_package_name }}"
+      - nss-mdns
+    state: present
+
+- name: Enable and start Avahi daemon
+  ansible.builtin.service:
+    name: avahi-daemon
+    enabled: true
+    state: started

@@ -1,0 +1,16 @@
+---
+- name: Update DNF cache
+  become: true
+  ansible.builtin.dnf:
+    update_cache: yes
+
+- name: Upgrade all packages
+  become: true
+  ansible.builtin.dnf:
+    name: "*"
+    state: latest
+
+- name: Autoremove unused packages
+  become: true
+  ansible.builtin.dnf:
+    autoremove: yes

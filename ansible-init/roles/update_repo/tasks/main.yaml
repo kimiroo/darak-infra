@@ -1,0 +1,12 @@
+---
+- name: Update mirror (Rocky Linux)
+  ansible.builtin.include_tasks: rocky.yaml
+  when: "'file-node' in group_names"
+
+- name: Update mirror (Proxmox VE)
+  ansible.builtin.include_tasks: pve.yaml
+  when: "'pve-node' in group_names"
+
+- name: Update mirror (Pi)
+  ansible.builtin.include_tasks: pi.yaml
+  when: "'pi-node' in group_names"

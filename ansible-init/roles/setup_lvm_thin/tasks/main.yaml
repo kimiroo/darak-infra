@@ -1,0 +1,80 @@
+---
+- name: Nuke NVMe drive
+  ansible.builtin.command: wipefs -a /dev/nvme0n1
+
+- name: Init drive with GPT label
+  community.general.parted:
+    device: /dev/nvme0n1
+    label: gpt
+    number: 1
+    flags: [ lvm ]
+    part_start: 0%
+    part_end: 100GiB
+    state: present
+
+- name: Create LUKS key directory
+  ansible.builtin.file:
+    path: /etc/cryptsetup-keys.d
+    state: directory
+    owner: root
+    group: root
+    mode: '0700'
+
+- name: Generate LUKS keyfile
+  ansible.builtin.command:
+    cmd: dd if=/dev/urandom out=/etc/cryptsetup-keys.d/nvme0n1p1.key bs=512 count=8
+    creates: /etc/cryptsetup-keys.d/nvme0n1p1.key
+
+- name: Secure keyfile directory permissions
+  ansible.builtin.file:
+    path: /etc/cryptsetup-keys.d/nvme0n1p1.key
+    owner: root
+    group: root
+    mode: '0600'
+
+- name: Create LUKS container with host password
+  community.crypto.luks_device:
+    device: /dev/nvme0n1p1
+    passphrase: "{{ luks_passwords[inventory_hostname] }}"
+    state: present
+
+- name: Add keyfile to LUKS device
+  community.crypto.luks_device:
+    device: /dev/nvme0n1p1
+    passphrase: "{{ luks_passwords[inventory_hostname] }}"
+    new_keyfile: /etc/cryptsetup-keys.d/nvme0n1p1.key
+    state: present
+
+- name: Configure crypttab for automatic unlock
+  community.general.crypttab:
+    name: crypt_nvme
+    backing_device: /dev/nvme0n1p1
+    password: /etc/cryptsetup-keys.d/nvme0n1p1.key
+    opts: discard
+    state: present
+
+- name: Open LUKS container
+  community.crypto.luks_device:
+    device: /dev/nvme0n1p1
+    name: crypt_nvme
+    keyfile: /etc/cryptsetup-keys.d/nvme0n1p1.key
+    allow_discards: true
+    state: opened
+
+- name: Create LVM Physical Volume on LUKS device
+  community.general.lvm_pv:
+    device: /dev/mapper/crypt_nvme
+    state: present
+
+- name: Create LVM Volume Group
+  community.general.lvg:
+    vg: vg_nvme
+    pvs: /dev/mapper/crypt_nvme
+    state: present
+
+- name: Create LVM Thin Pool
+  community.general.lvol:
+    vg: vg_nvme
+    thinpool: "nvme-lvm-thin"
+    size: 100%FREE
+    state: present

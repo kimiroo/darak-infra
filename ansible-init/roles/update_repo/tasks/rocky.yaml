@@ -1,0 +1,8 @@
+---
+- name: Update Rocky Linux mirror
+  ansible.builtin.shell: |
+    sed -i.bak \
+      -e 's|^#mirrorlist|mirrorlist|g' \
+      -e 's|^baseurl|#baseurl|g' \
+      -e 's|^mirrorlist.*|&\&country=KR|g' \
+      /etc/yum.repos.d/*.repo

@@ -1,0 +1,16 @@
+- name: Create systemd logind.conf.d directory
+  ansible.builtin.file:
+    path: /etc/systemd/logind.conf.d
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Create systemd-logind drop-in configuration for power buttons
+  ansible.builtin.copy:
+    src: 90-ignore-power-buttons.conf
+    dest: /etc/systemd/logind.conf.d/90-ignore-power-buttons.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart systemd-logind Service

@@ -1,0 +1,30 @@
+---
+- name: Disable Proxmox VE enterprise repository
+  ansible.builtin.blockinfile:
+    path: "{{ item }}"
+    insertafter: EOF
+    backup: yes
+    block: |
+      Enabled: false
+  loop:
+    - /etc/apt/sources.list.d/ceph.sources
+    - /etc/apt/sources.list.d/pve-enterprise.sources
+
+- name: Add Proxmox VE no-subscription repository
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/proxmox.sources
+    content: |
+      Types: deb
+      URIs: http://download.proxmox.com/debian/pve
+      Suites: trixie
+      Components: pve-no-subscription
+      Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Update Proxmox VE Debian mirror
+  ansible.builtin.shell: |
+    sed -i.bak \
+      -e 's|http://deb.debian.org/debian/|https://mirror.kakao.com/debian|g' \
+      /etc/apt/sources.list.d/debian.sources
