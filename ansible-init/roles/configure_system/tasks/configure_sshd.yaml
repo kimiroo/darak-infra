@@ -2,7 +2,7 @@
 - name: Configure SSH Security settings via Jinja2 template
   ansible.builtin.template:
     src: 99-security.conf.j2
-    dest: /etc/ssh/sshd_config.d/99-security.conf
+    dest: /etc/ssh/sshd_config.d/00-security.conf
     owner: root
     group: root
     mode: '0644'
