@@ -30,3 +30,11 @@
     - secrets.yaml
   roles:
     - role: setup_lvm_thin
+
+- name: Configure NUT
+  hosts: all
+  become: true
+  vars_files:
+    - secrets.yaml
+  roles:
+    - role: nut

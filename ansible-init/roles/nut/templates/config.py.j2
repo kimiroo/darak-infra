@@ -1,0 +1,9 @@
+TARGET_BATTERY_LEVEL = 80   # Target battery level to trigger WOL
+NOTIFY_URL = "{{ nut.ntfy_url }}"
+NOTIFY_API_KEY = "{{ nut.ntfy_api_key }}"
+HOSTS = [
+{% for host in nut.hosts %}
+  '{{ host }}'{% if not loop.last %},{% endif %}
+
+{% endfor %}
+]

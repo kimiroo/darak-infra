@@ -1,0 +1,102 @@
+---
+- name: Install NUT, python3-venv and python3-packaging
+  ansible.builtin.package:
+    name:
+      - nut
+      - nut-client
+      - nut-server
+      - python3-venv
+      - python3-packaging
+    state: present
+
+- name: Copy NUT config files
+  ansible.builtin.copy:
+    src: server/{{ item }}
+    dest: /etc/nut/{{ item }}
+    owner: root
+    group: nut
+    mode: '0644'
+  loop:
+    - nut.conf
+    - ups.conf
+    - upsd.conf
+
+- name: Create NUT config files from template
+  ansible.builtin.template:
+    src: server/{{ item }}.j2
+    dest: /etc/nut/{{ item }}
+    owner: root
+    group: nut
+    mode: '0640'
+  loop:
+    - upsd.users
+    - upsmon.conf
+
+- name: Create nut_script directory
+  ansible.builtin.file:
+    path: /etc/nut/nut_script
+    state: directory
+    owner: root
+    group: nut
+    mode: '0644'
+
+- name: Copy nut_script files
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: /etc/nut/nut_script/{{ item }}
+    owner: root
+    group: nut
+    mode: '0644'
+  loop:
+    - nut.sh
+    - on_ac_lost.py
+    - on_ac_restore.py
+
+- name: Create nut_script/config.py from template
+  ansible.builtin.template:
+    src: config.py.j2
+    dest: /etc/nut/nut_script/config.py
+    owner: root
+    group: nut
+    mode: '0640'
+
+- name: Make nut.sh executable
+  ansible.builtin.file:
+    path: /etc/nut/nut_script/nut.sh
+    mode: 'a+x'
+
+- name: Create nut_script log directory
+  ansible.builtin.file:
+    path: /var/log/nut_script/
+    state: directory
+    owner: root
+    group: nut
+    mode: '0644'
+
+- name: Configure venv for nut_script
+  ansible.builtin.pip:
+    name: wakeonlan
+    virtualenv: /etc/nut/nut_script/venv
+    virtualenv_command: /usr/bin/python3 -m venv
+    state: present
+
+- name: Enable and start NUT services
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: true
+    state: started
+  loop:
+    - nut-server
+    - nut-client
+    - nut-monitor
+
+- name: Perform Reboot
+  ansible.builtin.reboot:
+
+- name: Wait for hosts to come back online
+  ansible.builtin.wait_for_connection:
+    timeout: 600
+
+- name: Wait for NUT server (upsd) to come alive on port 3493
+  ansible.builtin.wait_for:
+    timeout: 30

@@ -1,0 +1,7 @@
+- name: Configure NUT server on Pi
+  ansible.builtin.include_tasks: server.yaml
+  when: "'pi_node' in group_names"
+
+- name: Configure NUT client
+  ansible.builtin.include_tasks: client.yaml
+  when: "'pi_node' not in group_names"

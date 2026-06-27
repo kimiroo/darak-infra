@@ -1,0 +1,42 @@
+---
+- name: Set NUT config directory
+  ansible.builtin.set_fact:
+    nut_config_dir: "/etc/{{ 'nut' if ansible_facts['os_family'] == 'Debian' else 'ups' }}"
+
+- name: Install NUT client
+  ansible.builtin.package:
+    name:
+      - nut
+      - nut-client
+    state: present
+
+- name: Copy NUT config files
+  ansible.builtin.copy:
+    src: server/{{ item }}
+    dest: "{{ nut_config_dir }}/{{ item }}"
+    owner: root
+    group: nut
+    mode: '0644'
+  loop:
+    - nut.conf
+
+- name: Create NUT config files from template
+  ansible.builtin.template:
+    src: server/{{ item }}.j2
+    dest: "{{ nut_config_dir }}/{{ item }}"
+    owner: root
+    group: nut
+    mode: '0640'
+  loop:
+    - upsmon.conf
+
+- name: Enable and start NUT services
+  ansible.builtin.systemd:
+    name: nut-monitor
+    enabled: true
+    state: started
+
+- name: Restart NUT services
+  ansible.builtin.systemd:
+    name: nut-monitor
+    state: restarted
