@@ -5,4 +5,12 @@
       -e 's|^#mirrorlist|mirrorlist|g' \
       -e 's|^baseurl|#baseurl|g' \
       -e 's|^mirrorlist.*|&\&country=KR|g' \
-      /etc/yum.repos.d/*.repo
+      /etc/yum.repos.d/rocky*.repo
+
+- name: Update Rocky Linux EPEL mirror
+  ansible.builtin.shell: |
+    sed -i.bak \
+      -e 's|^#metalink|metalink|g' \
+      -e 's|^baseurl|#baseurl|g' \
+      -e 's|^metalink.*|&\&country=KR|g' \
+      /etc/yum.repos.d/epel*.repo
