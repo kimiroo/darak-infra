@@ -1,0 +1,8 @@
+---
+- name: Start K3s VM
+  ansible.builtin.include_tasks: k3s.yaml
+  when: "'k3s_cluster' in group_names"
+
+- name: Start Docker VM
+  ansible.builtin.include_tasks: docker.yaml
+  when: "'docker_cluster' in group_names"

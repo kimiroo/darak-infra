@@ -1,0 +1,10 @@
+---
+- name: Start K3s master VM
+  ansible.builtin.command: >
+    qm start "{{ node_id }}01"
+  when: k3s_master.start
+
+- name: Start K3s worker VM
+  ansible.builtin.command: >
+    qm start "{{ node_id }}01"
+  when: k3s_worker.start

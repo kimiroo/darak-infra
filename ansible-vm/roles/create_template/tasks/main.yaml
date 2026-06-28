@@ -1,0 +1,113 @@
+---
+- name: Set Template VM ID
+  ansible.builtin.set_fact:
+    template_id: "9{{ node_id }}00"
+
+- name: Delete existing Template VM
+  ansible.builtin.command: >
+    qm destroy {{ template_id }} --purge --destroy-unreferenced-disks
+  failed_when: false
+
+- name: Download Rocky Linux qcow2 image
+  ansible.builtin.get_url:
+    url: "{{ base.rocky_image_url }}"
+    dest: /var/tmp/rocky-cloud-base.qcow2
+
+- name: Copy sshd 00-security.conf to temp directory
+  ansible.builtin.template:
+    src: 00-security.conf.j2
+    dest: /var/tmp/00-security.conf
+
+- name: Copy Chrony chrony.conf to temp directory
+  ansible.builtin.copy:
+    src: chrony.conf
+    dest: /var/tmp/chrony.conf
+
+- name: Save authorized_keys to temp directory
+  ansible.builtin.copy:
+    content: "{{ base.authorized_keys }}"
+    dest: /var/tmp/authorized_keys
+
+- name: Customize base image using virt-customize
+  ansible.builtin.shell: |
+    virt-customize -a /var/tmp/rocky-cloud-base.qcow2 \
+        --uninstall cockpit-bridge,cockpit-system,cockpit-ws \
+        --install vim,wget,curl,qemu-guest-agent,microcode_ctl,chrony \
+        --upload /var/tmp/chrony.conf:/etc/chrony.conf \
+        --upload /var/tmp/00-security.conf:/etc/ssh/sshd_config.d/00-security.conf \
+        --run-command 'chown root:root /etc/chrony.conf && \
+                       chmod 644 /etc/chrony.conf' \
+        --run-command 'chown root:root /etc/ssh/sshd_config.d/00-security.conf && \
+                       chmod 644 /etc/ssh/sshd_config.d/00-security.conf' \
+        --run-command 'systemctl enable qemu-guest-agent' \
+        --timezone "Asia/Seoul" \
+        --run-command 'dnf config-manager --setopt fastestmirror=1 --save' \
+        --run-command 'sed -i "/^mirrorlist=/s/\$/\&country=KR/" /etc/yum.repos.d/rocky*.repo' \
+        --run-command 'cloud-init clean' \
+        --run-command 'truncate -s 0 /etc/machine-id' \
+        --run-command 'rm -rf /var/lib/cloud/instances/*' \
+        --run-command 'rm -rf /var/lib/cloud/instance' \
+        --run-command 'rm -rf /var/log/cloud-init*' \
+        --run-command 'truncate -s 0 /var/log/wtmp' \
+        --run-command 'truncate -s 0 /var/log/lastlog' \
+        --run-command 'rm -f /etc/ssh/ssh_host_*' \
+        --run-command 'rm -rf /root/.ssh/known_hosts' \
+        --run-command 'rm -rf /home/*/.ssh/known_hosts' \
+        --run-command 'rm -f /etc/motd.d/cockpit' \
+        --run-command 'history -c && history -w' \
+        --selinux-relabel
+
+- name: Resize base image
+  ansible.builtin.shell: qemu-img resize /var/tmp/rocky-cloud-base.qcow2 {{ base.disk_size }}
+
+- name: Create VM
+  ansible.builtin.shell: |
+    qm create {{ template_id }} \
+      --name "{{ base.template_name }}" \
+      --memory {{ base.memory }} \
+      --cores {{ base.cores }} \
+      --net0 virtio,bridge="{{ base.bridge }}" \
+      --machine q35 \
+      --bios ovmf \
+      --scsihw virtio-scsi-single \
+      --cpu host
+
+- name: Import base image to target storage
+  ansible.builtin.shell: >
+    qm importdisk {{ template_id }} /var/tmp/rocky-cloud-base.qcow2 "{{ base.storage }}"
+
+- name: Attach imported base image to the VM (File-based Storage)
+  ansible.builtin.command: >
+    qm set {{ template_id }} --virtio0 "{{ base.storage }}:{{ template_id }}/vm-{{ template_id }}-disk-0.raw"
+  when: base.storage == 'local'
+
+- name: Attach imported base image to the VM (Block-based Storage)
+  ansible.builtin.command: >
+    qm set {{ template_id }} --virtio0 "{{ base.storage }}:vm-{{ template_id }}-disk-0,discard=on,iothread=1"
+  when: base.storage != 'local'
+
+- name: Configure VM cloud-init and extra settings
+  ansible.builtin.shell: |
+    qm set {{ template_id }} \
+      --ciuser={{ base.username }} --cipassword={{ base.password }} \
+      --sshkeys /var/tmp/authorized_keys \
+      --ipconfig0 ip=dhcp \
+      --agent 1 \
+      --boot c --bootdisk virtio0 \
+      --ide2 "{{ base.storage }}:cloudinit" \
+      --efidisk0 "{{ base.storage }}:1,format=raw,efitype=4m,pre-enrolled-keys=1" \
+      -serial0 socket
+
+- name: Configure VM to Template VM
+  ansible.builtin.shell: >
+    qm template {{ template_id }}
+
+- name: Clean up temporary files
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /var/tmp/rocky-cloud-base.qcow2
+    - /var/tmp/00-security.conf
+    - /var/tmp/chrony.conf
+    - /var/tmp/authorized_keys

@@ -1,0 +1,46 @@
+---
+- name: Set Template VM ID
+  ansible.builtin.set_fact:
+    template_id: "9{{ node_id }}00"
+
+- name: Set Docker VM ID
+  ansible.builtin.set_fact:
+    vm_id: "{{ node_id }}01"
+
+- name: Set Docker VM name
+  ansible.builtin.set_fact:
+    vm_name: "rocky-docker-01"
+
+- name: Set Docker VM IPv4 address
+  ansible.builtin.set_fact:
+    vm_ip: "10.5.47.{{ node_id }}1/16"
+
+- name: Set Docker VM tags
+  ansible.builtin.set_fact:
+    vm_tags: "k3s-worker,node-01"
+
+- name: Stop existing Docker VM
+  ansible.builtin.command: >
+    qm stop {{ vm_id }}
+  failed_when: false
+
+- name: Delete existing Docker VM
+  ansible.builtin.command: >
+    qm destroy {{ vm_id }} --purge --destroy-unreferenced-disks
+  failed_when: false
+
+- name: Clone Template VM
+  ansible.builtin.command: >
+    qm clone {{ template_id }} {{ vm_id }} --full \
+      --storage {{ docker.storage }} \
+      --name {{ vm_name }} \
+      --format raw
+
+- name: Configure Docker VM
+  ansible.builtin.command: >
+    qm set {{ vm_id }} \
+      --cores {{ docker.cores }} --memory {{ docker.memory }} \
+      --ipconfig0 ip={{ vm_ip }},gw={{ docker.gateway }} \
+      --tags {{ vm_tags }} \
+      {{ docker.devices | join(' ') }} \
+      --onboot 1

@@ -1,0 +1,24 @@
+---
+- name: Create Template VM
+  hosts: all
+  become: true
+  vars_files:
+    - vars.yaml
+  roles:
+    - role: create_template
+
+- name: Create VM
+  hosts: all
+  become: true
+  vars_files:
+    - vars.yaml
+  roles:
+    - role: create_vm
+
+- name: Start VM
+  hosts: all
+  become: true
+  vars_files:
+    - vars.yaml
+  roles:
+    - role: start_vm

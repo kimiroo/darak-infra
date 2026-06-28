@@ -1,0 +1,45 @@
+---
+- name: Set Template VM ID
+  ansible.builtin.set_fact:
+    template_id: "9{{ node_id }}00"
+
+- name: Set K3s worker VM ID
+  ansible.builtin.set_fact:
+    vm_id: "{{ node_id }}02"
+
+- name: Set K3s worker VM name
+  ansible.builtin.set_fact:
+    vm_name: "rocky-worker-0{{ node_id }}"
+
+- name: Set K3s worker VM IPv4 address
+  ansible.builtin.set_fact:
+    vm_ip: "10.5.47.{{ node_id }}2/16"
+
+- name: Set K3s worker VM tags
+  ansible.builtin.set_fact:
+    vm_tags: "k3s-worker,node-0{{ node_id }}"
+
+- name: Stop existing K3s worker VM
+  ansible.builtin.command: >
+    qm stop {{ vm_id }}
+  failed_when: false
+
+- name: Delete existing K3s worker VM
+  ansible.builtin.command: >
+    qm destroy {{ vm_id }} --purge --destroy-unreferenced-disks
+  failed_when: false
+
+- name: Clone Template VM
+  ansible.builtin.command: >
+    qm clone {{ template_id }} {{ vm_id }} --full \
+      --storage {{ k3s_worker.storage }} \
+      --name {{ vm_name }} \
+      --format raw
+
+- name: Configure K3s worker VM
+  ansible.builtin.command: >
+    qm set {{ vm_id }} \
+      --cores {{ k3s_worker.cores }} --memory {{ k3s_worker.memory }} \
+      --ipconfig0 ip={{ vm_ip }},gw={{ k3s_worker.gateway }} \
+      --tags {{ vm_tags }} \
+      --onboot 1

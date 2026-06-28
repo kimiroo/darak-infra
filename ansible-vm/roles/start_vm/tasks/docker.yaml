@@ -1,0 +1,5 @@
+---
+- name: Start Docker VM
+  ansible.builtin.command: >
+    qm start "{{ node_id }}01"
+  when: docker.start
