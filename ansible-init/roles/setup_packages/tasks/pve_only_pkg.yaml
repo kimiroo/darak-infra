@@ -3,5 +3,6 @@
   ansible.builtin.package:
     name:
       - cryptsetup
+      - libguestfs-tools
       - parted
     state: present

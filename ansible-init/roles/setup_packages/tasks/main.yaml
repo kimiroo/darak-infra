@@ -5,6 +5,6 @@
 - name: Setup Chrony
   ansible.builtin.include_tasks: chrony.yaml
 
-- name: Install cryptsetup and parted (PVE only)
+- name: Install cryptsetup, libguestfs-tools and parted (PVE only)
   ansible.builtin.include_tasks: pve_only_pkg.yaml
   when: "'pve_node' in group_names"
