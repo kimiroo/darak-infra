@@ -1,0 +1,43 @@
+base:
+  rocky_image_url: https://mirror.navercorp.com/rocky/10/images/x86_64/Rocky-10-GenericCloud-Base.latest.x86_64.qcow2
+  template_name: Rocky-10-Template
+
+  # VM
+  cores: 1
+  memory: 2048
+  disk_size: 40G
+  bridge: vmbr0
+  storage: local-lvm
+
+  # cloud-init
+  username: user
+  password: passWORD!
+  authorized_keys: |
+    ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIaaaBBBcccDDDeeeFFF key_1
+    ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIaaaBBBcccDDDeeeFFF key_2
+
+k3s_master:
+  # VM
+  cores: 1
+  memory: 4096
+  gateway: 10.5.0.254
+  storage: nvme-lvm-thin
+  start: false
+
+k3s_worker:
+  # VM
+  cores: 2
+  memory: 8192
+  gateway: 10.5.0.254
+  storage: nvme-lvm-thin
+  start: false
+
+docker:
+  # VM
+  cores: 3
+  memory: 6144
+  gateway: 10.5.0.254
+  storage: nvme-lvm-thin
+  start: false
+  devices:
+    - -usb0 host=1a86:7523,usb3=0
