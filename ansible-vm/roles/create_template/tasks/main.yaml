@@ -32,7 +32,7 @@
   ansible.builtin.shell: |
     virt-customize -a /var/tmp/rocky-cloud-base.qcow2 \
         --uninstall cockpit-bridge,cockpit-system,cockpit-ws \
-        --install vim,wget,curl,qemu-guest-agent,microcode_ctl,chrony \
+        --install vim,wget,curl,qemu-guest-agent,microcode_ctl,chrony,kernel-modules-extra \
         --upload /var/tmp/chrony.conf:/etc/chrony.conf \
         --upload /var/tmp/00-security.conf:/etc/ssh/sshd_config.d/00-security.conf \
         --run-command 'chown root:root /etc/chrony.conf && \
