@@ -1,0 +1,62 @@
+---
+- name: Add Docker CE Repository for RHEL
+  ansible.builtin.copy:
+    src: docker-ce.repo
+    dest: /etc/yum.repos.d/docker-ce.repo
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Update DNF cache
+  become: true
+  ansible.builtin.dnf:
+    update_cache: yes
+
+- name: Install Dependent RHEL 10 Package
+  when:
+    - ansible_facts['os_family'] == 'RedHat'
+    - ansible_facts['distribution_major_version'] == "10"
+    - ansible_facts['distribution'] != 'OracleLinux'
+  ansible.builtin.dnf:
+    name: kernel-modules-extra
+  notify: Perform Reboot
+
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Add br_netfilter to /etc/modules-load.d/
+  ansible.builtin.copy:
+    content: "br_netfilter"
+    dest: /etc/modules-load.d/br_netfilter.conf
+    mode: "u=rw,g=,o="
+
+- name: Load br_netfilter
+  community.general.modprobe:
+    name: br_netfilter
+    state: present
+
+- name: Set bridge-nf-call-iptables (just to be sure)
+  ansible.posix.sysctl:
+    name: "{{ item }}"
+    value: "1"
+    state: present
+    reload: true
+  loop:
+    - net.bridge.bridge-nf-call-iptables
+    - net.bridge.bridge-nf-call-ip6tables
+
+- name: Install Docker Engine
+  ansible.builtin.dnf:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+
+- name: Enable and start Docker Engine
+  ansible.builtin.service:
+    name: docker
+    enabled: true
+    state: started
