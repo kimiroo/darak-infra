@@ -1,8 +1,8 @@
 PubkeyAuthentication yes
 PasswordAuthentication no
 PermitEmptyPasswords no
-PermitRootLogin {{ 'prohibit-password' if ansible_user == 'root' else 'no' }}
-AllowUsers {{ ansible_user }}
+PermitRootLogin {{ 'prohibit-password' if base.username == 'root' else 'no' }}
+AllowUsers {{ base.username }}
 MaxAuthTries 3
 LoginGraceTime 60
 ClientAliveInterval 300
