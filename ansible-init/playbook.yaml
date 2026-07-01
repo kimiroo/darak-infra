@@ -31,6 +31,14 @@
   roles:
     - role: setup_lvm_thin
 
+- name: Configure DNS Settings on PVE
+  hosts: pve_node
+  become: true
+  vars_files:
+    - vars.yaml
+  roles:
+    - role: pve_dns
+
 - name: Configure NUT
   hosts: all
   become: true
