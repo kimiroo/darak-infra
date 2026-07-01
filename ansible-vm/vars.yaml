@@ -11,10 +11,6 @@ base:
 
   # cloud-init
   username: yongj
-  nameservers:
-    - 1.1.1.1
-    - 1.0.0.1
-  searchdomains: []
 
 k3s_master:
   # VM
