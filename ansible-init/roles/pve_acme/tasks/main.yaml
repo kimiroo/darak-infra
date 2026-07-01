@@ -1,0 +1,50 @@
+- name: Register Google Let's Encrypt ACME account (Cluster-wide)
+  ansible.builtin.command: |
+    pvesh create /cluster/acme/account \
+      --name letsencrypt \
+      --contact {{ acme.email }} \
+      --directory {{ acme.directory }} \
+      --tos_url .
+  run_once: true
+  register: acme_reg
+  failed_when: acme_reg.rc != 0 and 'already exists' not in acme_reg.stderr
+  changed_when: acme_reg.rc == 0
+
+- name: Create DNS challenge credential in temp directory
+  ansible.builtin.copy:
+    dest: /var/tmp/CF_CRED
+    content: |
+      CF_Token={{ acme.cf_token }}
+      CF_Account_ID={{ acme.cf_account_id }}
+    owner: root
+    group: root
+    mode: '0600'
+  run_once: true
+
+- name: Add ACME DNS challenge plugin (Cluster-wide)
+  ansible.builtin.command: |
+    pvenode acme plugin add dns dns_cf --api cf --data /var/tmp/CF_CRED --validation-delay 60
+  run_once: true
+  register: plugin_add
+  failed_when: plugin_add.rc != 0 and 'already exists' not in plugin_add.stderr
+  changed_when: plugin_add.rc == 0
+
+- name: Clean up temporary files
+  ansible.builtin.file:
+    path: /var/tmp/CF_CRED
+    state: absent
+
+- name: Bind distinct domain to each PVE node
+  ansible.builtin.command: |
+    pvenode config set --acme account=letsencrypt
+  changed_when: true
+
+- name: Bind distinct domain to each PVE node
+  ansible.builtin.command: |
+    pvenode config set --acmedomain0 {{ ansible_facts['hostname'] }}.{{ domain.domain_suffix }},plugin=dns_cf
+  changed_when: true
+
+- name: Order and Apply Let's Encrypt Certificate for each node
+  ansible.builtin.command: pvenode acme cert order
+  register: cert_order
+  changed_when: "'Certificates received' in cert_order.stdout"

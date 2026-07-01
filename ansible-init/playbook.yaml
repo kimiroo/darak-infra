@@ -39,6 +39,15 @@
   roles:
     - role: pve_dns
 
+- name: Configure PVE ACME
+  hosts: pve_node
+  become: true
+  vars_files:
+    - vars.yaml
+    - secrets.yaml
+  roles:
+    - role: pve_acme
+
 - name: Configure NUT
   hosts: all
   become: true
