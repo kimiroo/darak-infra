@@ -11,6 +11,7 @@ base:
 
   # cloud-init
   username: yongj
+  searchdomain: vm.internal.darak.cc
 
 k3s_master:
   # VM

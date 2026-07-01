@@ -105,6 +105,7 @@
       --cicustom "vendor=local:snippets/vm-{{ template_id }}-cloud-init.yaml" \
       --sshkeys /var/tmp/authorized_keys \
       --ipconfig0 ip=dhcp \
+      --searchdomain {{ base.searchdomain }} \
       --agent 1 \
       --boot c --bootdisk virtio0 \
       --ide2 "{{ base.storage }}:cloudinit" \
