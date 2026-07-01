@@ -13,6 +13,18 @@
     url: "{{ base.rocky_image_url }}"
     dest: /var/tmp/rocky-cloud-base.qcow2
 
+- name: Create Proxmox snippets directory if not exists
+  ansible.builtin.file:
+    path: "/var/lib/vz/snippets"
+    state: directory
+    mode: '0755'
+
+- name: Generate cloud-init config from template
+  ansible.builtin.template:
+    src: cloud-init.yaml.j2
+    dest: "/var/lib/vz/snippets/vm-{{ template_id }}-cloud-init.yaml"
+    mode: '0644'
+
 - name: Copy sshd 00-security.conf to temp directory
   ansible.builtin.template:
     src: 00-security.conf.j2
@@ -25,14 +37,14 @@
 
 - name: Save authorized_keys to temp directory
   ansible.builtin.copy:
-    content: "{{ base.authorized_keys }}"
+    content: "{{ secrets.authorized_keys | join('\n') }}\n"
     dest: /var/tmp/authorized_keys
 
 - name: Customize base image using virt-customize
   ansible.builtin.shell: |
     virt-customize -a /var/tmp/rocky-cloud-base.qcow2 \
         --uninstall cockpit-bridge,cockpit-system,cockpit-ws \
-        --install vim,wget,curl,qemu-guest-agent,microcode_ctl,chrony,kernel-modules-extra \
+        --install vim,wget,curl,qemu-guest-agent,microcode_ctl,chrony \
         --upload /var/tmp/chrony.conf:/etc/chrony.conf \
         --upload /var/tmp/00-security.conf:/etc/ssh/sshd_config.d/00-security.conf \
         --run-command 'chown root:root /etc/chrony.conf && \
@@ -89,7 +101,8 @@
 - name: Configure VM cloud-init and extra settings
   ansible.builtin.shell: |
     qm set {{ template_id }} \
-      --ciuser={{ base.username }} --cipassword={{ base.password }} \
+      --ciuser={{ base.username }} --cipassword={{ secrets.password }} \
+      --cicustom "vendor=local:snippets/vm-{{ template_id }}-cloud-init.yaml" \
       --sshkeys /var/tmp/authorized_keys \
       --ipconfig0 ip=dhcp \
       --agent 1 \

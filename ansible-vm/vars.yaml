@@ -10,11 +10,11 @@ base:
   storage: local-lvm
 
   # cloud-init
-  username: user
-  password: passWORD!
-  authorized_keys: |
-    ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIaaaBBBcccDDDeeeFFF key_1
-    ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIaaaBBBcccDDDeeeFFF key_2
+  username: yongj
+  nameservers:
+    - 1.1.1.1
+    - 1.0.0.1
+  searchdomains: []
 
 k3s_master:
   # VM

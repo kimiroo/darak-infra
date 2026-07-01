@@ -4,6 +4,7 @@
   become: true
   vars_files:
     - vars.yaml
+    - secrets.yaml
   roles:
     - role: create_template
 

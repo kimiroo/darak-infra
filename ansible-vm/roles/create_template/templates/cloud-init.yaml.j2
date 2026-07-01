@@ -1,0 +1,23 @@
+#cloud-config
+package_update: true
+package_upgrade: true
+
+packages:
+  - kernel-modules-extra
+
+manage_resolv_conf: true
+resolv_conf:
+  nameservers:
+{% for nameserver in base.nameservers %}
+    - {{ nameserver }}
+{% endfor %}
+  searchdomains:
+{% for searchdomain in base.searchdomains %}
+    - {{ searchdomain }}
+{% endfor %}
+
+power_state:
+  delay: "now"
+  mode: reboot
+  message: "Rebooting to apply new kernel modules and packages"
+  condition: true
