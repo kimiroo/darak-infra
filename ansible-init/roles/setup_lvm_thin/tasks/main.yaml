@@ -1,4 +1,13 @@
 ---
+- name: Install Clevis TPM2 packages
+  ansible.builtin.package:
+    name:
+      - clevis
+      - clevis-tpm2
+      - clevis-luks
+      - clevis-systemd
+    state: present
+
 - name: Nuke NVMe drive
   ansible.builtin.command: wipefs -a /dev/nvme0n1
 
@@ -15,54 +24,38 @@
 - name: Nuke partition internal LUKS header
   ansible.builtin.command: wipefs -a /dev/nvme0n1p1
 
-- name: Create LUKS key directory
-  ansible.builtin.file:
-    path: /etc/cryptsetup-keys.d
-    state: directory
-    owner: root
-    group: root
-    mode: '0700'
-
-- name: Generate LUKS keyfile
-  ansible.builtin.command:
-    cmd: dd if=/dev/urandom of=/etc/cryptsetup-keys.d/nvme0n1p1.key bs=512 count=8
-    creates: /etc/cryptsetup-keys.d/nvme0n1p1.key
-
-- name: Secure keyfile directory permissions
-  ansible.builtin.file:
-    path: /etc/cryptsetup-keys.d/nvme0n1p1.key
-    owner: root
-    group: root
-    mode: '0600'
-
 - name: Create LUKS container with host password
   community.crypto.luks_device:
     device: /dev/nvme0n1p1
-    passphrase: "{{ luks_passwords.inventory_hostname }}"
+    passphrase: "{{ luks_passwords[inventory_hostname] }}"
     state: present
   no_log: true
 
-- name: Add keyfile to LUKS device
-  community.crypto.luks_device:
-    device: /dev/nvme0n1p1
-    passphrase: "{{ luks_passwords.inventory_hostname }}"
-    new_keyfile: /etc/cryptsetup-keys.d/nvme0n1p1.key
-    state: present
+- name: Bind LUKS partition to TPM2 via Clevis (PCR 0+7)
+  ansible.builtin.shell: >
+    echo -n "{{ luks_passwords[inventory_hostname] }}" |
+    clevis luks bind -y -k - -d /dev/nvme0n1p1 tpm2 '{"pcr_bank":"sha256","pcr_ids":"0,7"}'
   no_log: true
 
-- name: Configure crypttab for automatic unlock
+- name: Enable Clevis askpass path for automatic unlock at boot
+  ansible.builtin.systemd:
+    name: clevis-luks-askpass.path
+    enabled: true
+    state: started
+
+- name: Configure crypttab for automatic Clevis unlock
   community.general.crypttab:
     name: crypt_nvme
     backing_device: /dev/nvme0n1p1
-    password: /etc/cryptsetup-keys.d/nvme0n1p1.key
-    opts: discard
+    password: none
+    opts: discard,_netdev
     state: present
 
 - name: Open LUKS container
   community.crypto.luks_device:
     device: /dev/nvme0n1p1
     name: crypt_nvme
-    keyfile: /etc/cryptsetup-keys.d/nvme0n1p1.key
+    passphrase: "{{ luks_passwords[inventory_hostname] }}"
     allow_discards: true
     state: opened
 
