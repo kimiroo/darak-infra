@@ -1,4 +1,4 @@
-- name: Register Google Let's Encrypt ACME account (Cluster-wide)
+- name: Register ACME account (Cluster-wide)
   ansible.builtin.command: |
     pvesh create /cluster/acme/account \
       --name letsencrypt \
