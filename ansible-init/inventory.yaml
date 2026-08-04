@@ -1,29 +1,31 @@
 all:
   vars:
-    ansible_ssh_private_key_file: ~/.ssh/id_ed25519_ansible
     ansible_python_interpreter: /usr/bin/python3
   children:
     pve_node:
-      vars:
-        ansible_user: root
       hosts:
         pve-node-01:
-          ansible_host: 10.5.46.10
+          ansible_host: 10.10.10.10
         pve-node-02:
-          ansible_host: 10.5.46.20
+          ansible_host: 10.10.10.20
         pve-node-03:
-          ansible_host: 10.5.46.30
+          ansible_host: 10.10.10.30
         pve-node-04:
-          ansible_host: 10.5.46.40
-    file_node:
+          ansible_host: 10.10.10.40
       vars:
-        ansible_user: yongj
+        ansible_user: root
+        ansible_ssh_private_key_file: ~/.ssh/id_ed25519_metal
+    file_node:
       hosts:
         file-node-01:
-          ansible_host: 10.5.46.50
-    pi_node:
+          ansible_host: 10.10.10.50
       vars:
         ansible_user: yongj
+        ansible_ssh_private_key_file: ~/.ssh/id_ed25519_storage
+    pi_node:
       hosts:
         pi-node-01:
-          ansible_host: 10.5.46.60
+          ansible_host: 10.10.10.60
+      vars:
+        ansible_user: yongj
+        ansible_ssh_private_key_file: ~/.ssh/id_ed25519_metal
