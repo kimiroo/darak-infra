@@ -1,6 +1,6 @@
-root,10.5.46.10
-root,10.5.46.20
-root,10.5.46.30
-root,10.5.46.40
-yongj,10.5.46.50
-yongj,10.5.46.60
+root,10.10.10.10,/home/yongj/.ssh/id_ed25519_metal.pub
+root,10.10.10.20,/home/yongj/.ssh/id_ed25519_metal.pub
+root,10.10.10.30,/home/yongj/.ssh/id_ed25519_metal.pub
+root,10.10.10.40,/home/yongj/.ssh/id_ed25519_metal.pub
+yongj,10.10.10.50,/home/yongj/.ssh/id_ed25519_storage.pub
+yongj,10.10.10.60,/home/yongj/.ssh/id_ed25519_metal.pub
