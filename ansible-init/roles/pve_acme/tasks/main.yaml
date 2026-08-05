@@ -45,6 +45,6 @@
   changed_when: true
 
 - name: Order and Apply Let's Encrypt Certificate for each node
-  ansible.builtin.command: pvenode acme cert order
+  ansible.builtin.command: pvenode acme cert order --force 1
   register: cert_order
   changed_when: "'Certificates received' in cert_order.stdout"
