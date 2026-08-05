@@ -2,5 +2,6 @@
   ansible.builtin.shell: |
     pvesh set /nodes/localhost/dns \
       --search "{{ base.dns_search | default('local') }}" \
-      --dns1 "{{ base.dns_primary }}" \
-      --dns2 "{{ base.dns_secondary }}"
+      --dns1 "{{ base.dns_1 }}" \
+      --dns2 "{{ base.dns_2 }}" \
+      --dns3 "{{ base.dns_3 }}"

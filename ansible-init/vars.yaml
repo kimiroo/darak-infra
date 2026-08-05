@@ -1,8 +1,0 @@
----
-domain:
-  domain_suffix: pve.internal.darak.cc
-
-base:
-  dns_search: local
-  dns_primary: 1.1.1.1
-  dns_secondary: 1.0.0.1
