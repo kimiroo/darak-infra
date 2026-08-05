@@ -15,7 +15,7 @@
     dest: /etc/apt/sources.list.d/proxmox.sources
     content: |
       Types: deb
-      URIs: http://download.proxmox.com/debian/pve
+      URIs: https://mirror.techlabs.co.kr/proxmox/debian/pve
       Suites: trixie
       Components: pve-no-subscription
       Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg
@@ -26,5 +26,6 @@
 - name: Update Proxmox VE Debian mirror
   ansible.builtin.shell: |
     sed -i.bak \
-      -e 's|http://deb.debian.org/debian/|https://mirror.kakao.com/debian|g' \
+      -e 's|http://deb.debian.org/debian/|https://mirror.techlabs.co.kr/debian|g' \
+      -e 's|http://security.debian.org/debian-security/|https://mirror.techlabs.co.kr/debian-security|g' \
       /etc/apt/sources.list.d/debian.sources
