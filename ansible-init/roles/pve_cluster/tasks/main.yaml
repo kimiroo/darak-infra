@@ -1,0 +1,42 @@
+---
+- name: Create PVE Cluster on first node
+  ansible.builtin.shell: |
+    pvesh create /cluster/config \
+      --clustername "darak-cluster" \
+      --link0 "10.10.10.{{ ansible_host.split('.')[-1] }}" \
+      --link1 "fdab:d9c3:fb50:10::10:{{ ansible_host.split('.')[-1] }}"
+  args:
+    creates: /etc/pve/corosync.conf
+  when: inventory_hostname == ansible_play_hosts[0]
+
+- name: Wait for the Cluster to be ready
+  ansible.builtin.pause:
+    seconds: 5
+  when: inventory_hostname == ansible_play_hosts[0]
+
+- name: Get Cluster join information
+  ansible.builtin.shell: |
+    pvesh get /cluster/config/join --output-format json
+  register: pve_join_raw
+  changed_when: false
+  when: inventory_hostname == ansible_play_hosts[0]
+
+- name: Set join info fact on first host
+  ansible.builtin.set_fact:
+    pve_join_info: "{{ pve_join_raw.stdout | from_json }}"
+  when: inventory_hostname == ansible_play_hosts[0]
+
+- name: Join the Cluster on other PVE nodes sequentially
+  ansible.builtin.shell: |
+    pvesh create /cluster/config/join \
+      --hostname "{{ hostvars[ansible_play_hosts[0]]['ansible_host'] }}" \
+      --password "{{ pve.password }}" \
+      --fingerprint "{{ (hostvars[ansible_play_hosts[0]]['pve_join_info'].nodelist | selectattr('name', 'equalto', hostvars[ansible_play_hosts[0]]['pve_join_info'].preferred_node) | map(attribute='pve_fp') | first) }}" \
+      --link0 "10.10.10.{{ ansible_host.split('.')[-1] }}" \
+      --link1 "fdab:d9c3:fb50:10::10:{{ ansible_host.split('.')[-1] }}"
+
+    sleep 20
+  args:
+    creates: /etc/pve/corosync.conf
+  throttle: 1
+  when: inventory_hostname != ansible_play_hosts[0]

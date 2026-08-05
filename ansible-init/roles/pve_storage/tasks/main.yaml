@@ -1,0 +1,10 @@
+- name: Enable LVM-Thin Storage Cluster-wide
+  ansible.builtin.shell: |
+    pvesh set /storage \
+      --storage "nvme-lvm" \
+      --vgname "nvme-lvm-thin" \
+      --content "images" \
+      --content "rootdir" \
+      --type "lvmthin" \
+      --disable "0"
+  when: inventory_hostname == ansible_play_hosts[0]

@@ -47,6 +47,21 @@
   roles:
     - role: pve_dns
 
+- name: Configure PVE Cluster
+  hosts: pve_node
+  become: true
+  vars_files:
+    - vars.yaml
+    - secrets.yaml
+  roles:
+    - role: pve_cluster
+
+- name: Configure PVE Storafe
+  hosts: pve_node
+  become: true
+  roles:
+    - role: pve_storage
+
 - name: Configure PVE ACME
   hosts: pve_node
   become: true
