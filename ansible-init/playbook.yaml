@@ -56,7 +56,7 @@
   roles:
     - role: pve_cluster
 
-- name: Configure PVE Storafe
+- name: Configure PVE Storage
   hosts: pve_node
   become: true
   roles:
