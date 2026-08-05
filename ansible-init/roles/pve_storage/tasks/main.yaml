@@ -1,10 +1,15 @@
 - name: Enable LVM-Thin Storage Cluster-wide
   ansible.builtin.shell: |
-    pvesh set /storage \
-      --storage "nvme-lvm" \
-      --vgname "nvme-lvm-thin" \
-      --content "images" \
-      --content "rootdir" \
-      --type "lvmthin" \
+    pvesm add lvmthin "nvme-lvm" \
+      --vgname "vg_nvme" \
+      --thinpool "nvme-lvm-thin" \
+      --content "images,rootdir" \
+      --disable "0"
+  when: inventory_hostname == ansible_play_hosts[0]
+
+- name: Add Snippets to local storage's available content
+  ansible.builtin.shell: |
+    pvesm set local \
+      --content "import,vztmpl,iso,backup,snippets" \
       --disable "0"
   when: inventory_hostname == ansible_play_hosts[0]
