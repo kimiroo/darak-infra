@@ -399,12 +399,12 @@ set firewall group address-group PVE_NODE_04 address '10.10.10.40'
 set firewall group address-group FILE_NODE_01 address '10.10.10.50'
 set firewall group address-group PI_NODE_01 address '10.10.10.60'
 
-set firewall group ipv6-address-group PVE_NODE_01_V6 address 'fdab:d9c3:fb50:10::10:10'
-set firewall group ipv6-address-group PVE_NODE_02_V6 address 'fdab:d9c3:fb50:10::10:20'
-set firewall group ipv6-address-group PVE_NODE_03_V6 address 'fdab:d9c3:fb50:10::10:30'
-set firewall group ipv6-address-group PVE_NODE_04_V6 address 'fdab:d9c3:fb50:10::10:40'
-set firewall group ipv6-address-group FILE_NODE_01_V6 address 'fdab:d9c3:fb50:10::10:50'
-set firewall group ipv6-address-group PI_NODE_01_V6 address 'fdab:d9c3:fb50:10::10:60'
+set firewall group ipv6-address-group PVE_NODE_01_V6 address 'fdab:d9c3:fb50:10:10::10'
+set firewall group ipv6-address-group PVE_NODE_02_V6 address 'fdab:d9c3:fb50:10:10::20'
+set firewall group ipv6-address-group PVE_NODE_03_V6 address 'fdab:d9c3:fb50:10:10::30'
+set firewall group ipv6-address-group PVE_NODE_04_V6 address 'fdab:d9c3:fb50:10:10::40'
+set firewall group ipv6-address-group FILE_NODE_01_V6 address 'fdab:d9c3:fb50:10:10::50'
+set firewall group ipv6-address-group PI_NODE_01_V6 address 'fdab:d9c3:fb50:10:10::60'
 
 # VM Nodes
 set firewall group address-group ROCKY_K3S_NODES address '10.10.20.11'
@@ -415,13 +415,13 @@ set firewall group address-group ROCKY_K3S_NODES address '10.10.20.31'
 set firewall group address-group ROCKY_K3S_NODES address '10.10.20.32'
 set firewall group address-group ROCKY_DOCKER_01 address '10.10.20.41'
 
-set firewall group ipv6-address-group ROCKY_K3S_NODES_V6 address 'fdab:d9c3:fb50:10::20:11'
-set firewall group ipv6-address-group ROCKY_K3S_NODES_V6 address 'fdab:d9c3:fb50:10::20:12'
-set firewall group ipv6-address-group ROCKY_K3S_NODES_V6 address 'fdab:d9c3:fb50:10::20:21'
-set firewall group ipv6-address-group ROCKY_K3S_NODES_V6 address 'fdab:d9c3:fb50:10::20:22'
-set firewall group ipv6-address-group ROCKY_K3S_NODES_V6 address 'fdab:d9c3:fb50:10::20:31'
-set firewall group ipv6-address-group ROCKY_K3S_NODES_V6 address 'fdab:d9c3:fb50:10::20:32'
-set firewall group ipv6-address-group ROCKY_DOCKER_01_V6 address 'fdab:d9c3:fb50:10::20:41'
+set firewall group ipv6-address-group ROCKY_K3S_NODES_V6 address 'fdab:d9c3:fb50:10:20::11'
+set firewall group ipv6-address-group ROCKY_K3S_NODES_V6 address 'fdab:d9c3:fb50:10:20::12'
+set firewall group ipv6-address-group ROCKY_K3S_NODES_V6 address 'fdab:d9c3:fb50:10:20::21'
+set firewall group ipv6-address-group ROCKY_K3S_NODES_V6 address 'fdab:d9c3:fb50:10:20::22'
+set firewall group ipv6-address-group ROCKY_K3S_NODES_V6 address 'fdab:d9c3:fb50:10:20::31'
+set firewall group ipv6-address-group ROCKY_K3S_NODES_V6 address 'fdab:d9c3:fb50:10:20::32'
+set firewall group ipv6-address-group ROCKY_DOCKER_01_V6 address 'fdab:d9c3:fb50:10:20::41'
 
 # VPN Definition
 set firewall group network-group ADMIN_VPN_RANGE network '10.7.10.0/24'
@@ -640,7 +640,7 @@ set firewall ipv6 forward filter rule 130 destination port '22'
 #set firewall ipv6 forward filter rule 140 action 'accept'
 #set firewall ipv6 forward filter rule 140 description 'VLAN5 to FreeRADIUS'
 #set firewall ipv6 forward filter rule 140 source group network-group 'VLAN5_V6'
-#set firewall ipv6 forward filter rule 140 destination address 'fdab:d9c3:fb50:10::10:50'# <-- Change to actual FreeRADIUS IP
+#set firewall ipv6 forward filter rule 140 destination address 'fdab:d9c3:fb50:10:10::50'# <-- Change to actual FreeRADIUS IP
 #set firewall ipv6 forward filter rule 140 protocol 'udp'
 #set firewall ipv6 forward filter rule 140 destination group port-group 'RADIUS_PORTS'
 
@@ -758,57 +758,57 @@ set system static-host-mapping host-name 'darak-ap-02.internal.darak.dev' inet '
 
 # pve-node-01
 set system static-host-mapping host-name 'pve-node-01.internal.darak.dev' inet '10.10.10.10'
-set system static-host-mapping host-name 'pve-node-01.internal.darak.dev' inet 'fdab:d9c3:fb50:10::10:10'
+set system static-host-mapping host-name 'pve-node-01.internal.darak.dev' inet 'fdab:d9c3:fb50:10:10::10'
 
 # pve-node-02
 set system static-host-mapping host-name 'pve-node-02.internal.darak.dev' inet '10.10.10.20'
-set system static-host-mapping host-name 'pve-node-02.internal.darak.dev' inet 'fdab:d9c3:fb50:10::10:20'
+set system static-host-mapping host-name 'pve-node-02.internal.darak.dev' inet 'fdab:d9c3:fb50:10:10::20'
 
 # pve-node-03
 set system static-host-mapping host-name 'pve-node-03.internal.darak.dev' inet '10.10.10.30'
-set system static-host-mapping host-name 'pve-node-03.internal.darak.dev' inet 'fdab:d9c3:fb50:10::10:30'
+set system static-host-mapping host-name 'pve-node-03.internal.darak.dev' inet 'fdab:d9c3:fb50:10:10::30'
 
 # pve-node-04
 set system static-host-mapping host-name 'pve-node-04.internal.darak.dev' inet '10.10.10.40'
-set system static-host-mapping host-name 'pve-node-04.internal.darak.dev' inet 'fdab:d9c3:fb50:10::10:40'
+set system static-host-mapping host-name 'pve-node-04.internal.darak.dev' inet 'fdab:d9c3:fb50:10:10::40'
 
 # file-node-01
 set system static-host-mapping host-name 'file-node-01.internal.darak.dev' inet '10.10.10.50'
-set system static-host-mapping host-name 'file-node-01.internal.darak.dev' inet 'fdab:d9c3:fb50:10::10:50'
+set system static-host-mapping host-name 'file-node-01.internal.darak.dev' inet 'fdab:d9c3:fb50:10:10::50'
 
 # pi-node-01
 set system static-host-mapping host-name 'pi-node-01.internal.darak.dev' inet '10.10.10.60'
-set system static-host-mapping host-name 'pi-node-01.internal.darak.dev' inet 'fdab:d9c3:fb50:10::10:60'
+set system static-host-mapping host-name 'pi-node-01.internal.darak.dev' inet 'fdab:d9c3:fb50:10:10::60'
 
 
 
 # rocky-master-01
 set system static-host-mapping host-name 'rocky-master-01.internal.darak.dev' inet '10.10.20.11'
-set system static-host-mapping host-name 'rocky-master-01.internal.darak.dev' inet 'fdab:d9c3:fb50:10::20:11'
+set system static-host-mapping host-name 'rocky-master-01.internal.darak.dev' inet 'fdab:d9c3:fb50:10:20::11'
 
 # rocky-worker-01
 set system static-host-mapping host-name 'rocky-worker-01.internal.darak.dev' inet '10.10.20.12'
-set system static-host-mapping host-name 'rocky-worker-01.internal.darak.dev' inet 'fdab:d9c3:fb50:10::20:12'
+set system static-host-mapping host-name 'rocky-worker-01.internal.darak.dev' inet 'fdab:d9c3:fb50:10:20::12'
 
 # rocky-master-02
 set system static-host-mapping host-name 'rocky-master-02.internal.darak.dev' inet '10.10.20.21'
-set system static-host-mapping host-name 'rocky-master-02.internal.darak.dev' inet 'fdab:d9c3:fb50:10::20:21'
+set system static-host-mapping host-name 'rocky-master-02.internal.darak.dev' inet 'fdab:d9c3:fb50:10:20::21'
 
 # rocky-worker-02
 set system static-host-mapping host-name 'rocky-worker-02.internal.darak.dev' inet '10.10.20.22'
-set system static-host-mapping host-name 'rocky-worker-02.internal.darak.dev' inet 'fdab:d9c3:fb50:10::20:22'
+set system static-host-mapping host-name 'rocky-worker-02.internal.darak.dev' inet 'fdab:d9c3:fb50:10:20::22'
 
 # rocky-master-03
 set system static-host-mapping host-name 'rocky-master-03.internal.darak.dev' inet '10.10.20.31'
-set system static-host-mapping host-name 'rocky-master-03.internal.darak.dev' inet 'fdab:d9c3:fb50:10::20:31'
+set system static-host-mapping host-name 'rocky-master-03.internal.darak.dev' inet 'fdab:d9c3:fb50:10:20::31'
 
 # rocky-worker-03
 set system static-host-mapping host-name 'rocky-worker-03.internal.darak.dev' inet '10.10.20.32'
-set system static-host-mapping host-name 'rocky-worker-03.internal.darak.dev' inet 'fdab:d9c3:fb50:10::20:32'
+set system static-host-mapping host-name 'rocky-worker-03.internal.darak.dev' inet 'fdab:d9c3:fb50:10:20::32'
 
 # rocky-docker-01
 set system static-host-mapping host-name 'rocky-docker-01.internal.darak.dev' inet '10.10.20.41'
-set system static-host-mapping host-name 'rocky-docker-01.internal.darak.dev' inet 'fdab:d9c3:fb50:10::20:41'
+set system static-host-mapping host-name 'rocky-docker-01.internal.darak.dev' inet 'fdab:d9c3:fb50:10:20::41'
 
 commit comment 'static-host-mapping: Configure static host mapping'
 save

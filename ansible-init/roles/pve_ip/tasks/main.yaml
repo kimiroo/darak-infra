@@ -4,7 +4,7 @@
       --type "bridge" \
       --cidr "10.10.10.{{ ansible_host.split('.')[-1] }}/16" \
       --gateway "10.10.0.1" \
-      --cidr6 "fdab:d9c3:fb50:10::10:{{ ansible_host.split('.')[-1] }}/64" \
+      --cidr6 "fdab:d9c3:fb50:10:10::{{ ansible_host.split('.')[-1] }}/64" \
       --gateway6 "fdab:d9c3:fb50:10::1"
 
 - name: Reload network configuration
