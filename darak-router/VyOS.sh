@@ -175,9 +175,6 @@ set interface bridge br0 member interface eth5 native-vlan 80
 set interface bridge br0 vif 5 address '10.5.0.1/16'   # Network
 set interface bridge br0 vif 5 address 'fdab:d9c3:fb50:5::1/64'
 
-set interface bridge br0 vif 7 address '10.7.0.1/16'   # VPN
-set interface bridge br0 vif 7 address 'fdab:d9c3:fb50:7::1/64'
-
 set interface bridge br0 vif 10 address '10.10.0.1/16' # Infra
 set interface bridge br0 vif 10 address 'fdab:d9c3:fb50:10::1/64'
 
@@ -215,12 +212,6 @@ set service router-advert interface br0.5 prefix fdab:d9c3:fb50:5::/64
 set service router-advert interface br0.5 name-server 2a07:a8c0::ef:3c69
 set service router-advert interface br0.5 name-server 2a07:a8c1::ef:3c69
 set service router-advert interface br0.5 dnssl 'internal.darak.dev'
-
-# VLAN 7 (VPN)
-set service router-advert interface br0.7 prefix fdab:d9c3:fb50:7::/64
-set service router-advert interface br0.7 name-server 2a07:a8c0::12:2774
-set service router-advert interface br0.7 name-server 2a07:a8c1::12:2774
-set service router-advert interface br0.7 dnssl 'internal.darak.dev'
 
 # VLAN 10 (Infra)
 set service router-advert interface br0.10 prefix fdab:d9c3:fb50:10::/64
@@ -440,7 +431,7 @@ set firewall group ipv6-address-group ROCKY_DOCKER_01_V6 address 'fdab:d9c3:fb50
 
 # VPN Definition
 set firewall group network-group ADMIN_VPN_RANGE network '10.7.10.0/24'
-set firewall group ipv6-network-group ADMIN_VPN_RANGE_V6 network 'fdab:d9c3:fb50:7::/64'
+set firewall group ipv6-network-group ADMIN_VPN_RANGE_V6 network 'fdab:d9c3:fb50:7:10::/80'
 
 # Target internal networks accessible from Admin VPN (VLAN 7)
 set firewall group network-group ADMIN_DESTINATIONS network '10.5.0.0/16'
@@ -699,6 +690,13 @@ set firewall ipv6 forward filter rule 200 action 'drop'
 set firewall ipv6 forward filter rule 200 description 'Drop IoT to Internet'
 set firewall ipv6 forward filter rule 200 source group network-group 'VLAN80_V6'
 set firewall ipv6 forward filter rule 200 outbound-interface name 'eth0'
+
+# Rule 1000: Allow all forwarding traffic from wg0
+set firewall ipv4 forward filter rule 1000 action 'accept'
+set firewall ipv4 forward filter rule 1000 inbound-interface name 'wg0'
+
+set firewall ipv6 forward filter rule 1000 action 'accept'
+set firewall ipv6 forward filter rule 1000 inbound-interface name 'wg0'
 
 # ==================================================
 # 4. Final Drop Baseline (Inter-VLAN Isolation Blackhole)
