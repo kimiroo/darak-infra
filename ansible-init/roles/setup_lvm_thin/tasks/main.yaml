@@ -50,6 +50,7 @@
     password: none
     opts: discard,_netdev
     state: present
+  no_log: true
 
 - name: Open LUKS container
   community.crypto.luks_device:
