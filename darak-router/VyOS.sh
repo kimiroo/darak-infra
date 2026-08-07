@@ -238,10 +238,10 @@ set service router-advert interface br0.70 name-server 2a07:a8c1::4d:fa1f
 set service router-advert interface br0.70 dnssl 'internal.darak.dev'
 
 # VLAN 80 (IoT)
-set service router-advert interface br0.80 prefix fdab:d9c3:fb50:80::/64
-set service router-advert interface br0.80 name-server 2a07:a8c0::5a:4515
-set service router-advert interface br0.80 name-server 2a07:a8c1::5a:4515
-set service router-advert interface br0.80 dnssl 'internal.darak.dev'
+#set service router-advert interface br0.80 prefix fdab:d9c3:fb50:80::/64
+#set service router-advert interface br0.80 name-server 2a07:a8c0::5a:4515
+#set service router-advert interface br0.80 name-server 2a07:a8c1::5a:4515
+#set service router-advert interface br0.80 dnssl 'internal.darak.dev'
 
 # VLAN 90 (Guest)
 set service router-advert interface br0.90 prefix fdab:d9c3:fb50:90::/64
@@ -258,11 +258,11 @@ save
 
 
 
-########################
-### DHCP (IPv4 Only) ###
-########################
+###################
+### DHCP (IPv4) ###
+###################
 
-echo "Configuring: DHCP (IPv4 Only)..."
+echo "Configuring: DHCP (IPv4)..."
 
 # VLAN 10 (Infra)
 set service dhcp-server shared-network-name VLAN10 subnet 10.10.0.0/16 subnet-id 10
@@ -344,6 +344,25 @@ set service dhcp-server hostfile-update
 
 commit comment 'dhcp-server: Configure DHCP server'
 save
+
+
+
+###################
+### DHCP (IPv6) ###
+###################
+
+echo "Configuring: DHCP (IPv6 Only)..."
+
+# VLAN 80 (IoT)
+set service dhcpv6-server shared-network-name VLAN80 subnet fdab:d9c3:fb50:80::/64 subnet-id 10
+
+set service dhcpv6-server shared-network-name VLAN80 subnet fdab:d9c3:fb50:80::/64 option name-server 2a07:a8c0::5a:4515
+set service dhcpv6-server shared-network-name VLAN80 subnet fdab:d9c3:fb50:80::/64 option name-server 2a07:a8c1::5a:4515
+
+set service dhcpv6-server shared-network-name VLAN80 subnet fdab:d9c3:fb50:80::/64 range 0 start fdab:d9c3:fb50:80:20::100
+set service dhcpv6-server shared-network-name VLAN80 subnet fdab:d9c3:fb50:80::/64 range 0 stop fdab:d9c3:fb50:80:20::250
+
+commit comment 'dhcpv6-server: Configure DHCPv6 server'
 
 
 
@@ -445,6 +464,10 @@ set firewall group ipv6-network-group ADMIN_DESTINATIONS_V6 network 'fdab:d9c3:f
 set firewall group ipv6-network-group ADMIN_DESTINATIONS_V6 network 'fdab:d9c3:fb50:20::/64'
 set firewall group ipv6-network-group ADMIN_DESTINATIONS_V6 network 'fdab:d9c3:fb50:30::/64'
 set firewall group ipv6-network-group ADMIN_DESTINATIONS_V6 network 'fdab:d9c3:fb50:80::/64'
+
+# Cloud IoT devices subnet
+set firewall group network-group CLOUD_IOT network '10.80.100.0/24'
+set firewall group ipv6-network-group CLOUD_IOT_V6 network 'fdab:d9c3:fb50:80:100::/80'
 
 # Total private address space used for default-drop Inter-VLAN isolation
 set firewall group network-group INTERNAL_NETWORKS network '10.0.0.0/8'
@@ -680,16 +703,27 @@ set firewall ipv6 forward filter rule 160 destination group network-group 'VLAN8
 set firewall ipv6 forward filter rule 160 protocol 'udp'
 set firewall ipv6 forward filter rule 160 destination port '5540'
 
-# Rule 160: Drop IoT to Internet
-set firewall ipv4 forward filter rule 200 action 'drop'
-set firewall ipv4 forward filter rule 200 description 'Drop IoT to Internet'
-set firewall ipv4 forward filter rule 200 source group network-group 'VLAN80'
+# Rule 200: Drop IoT to Internet
+set firewall ipv4 forward filter rule 200 action 'accept'
+set firewall ipv4 forward filter rule 200 description 'Allow Cloud IoT devices to access Internet'
+set firewall ipv4 forward filter rule 200 source group network-group 'CLOUD_IOT'
 set firewall ipv4 forward filter rule 200 outbound-interface name 'eth0'
 
-set firewall ipv6 forward filter rule 200 action 'drop'
-set firewall ipv6 forward filter rule 200 description 'Drop IoT to Internet'
-set firewall ipv6 forward filter rule 200 source group network-group 'VLAN80_V6'
+set firewall ipv6 forward filter rule 200 action 'accept'
+set firewall ipv6 forward filter rule 200 description 'Allow Cloud IoT devices to access Internet'
+set firewall ipv6 forward filter rule 200 source group network-group 'CLOUD_IOT_V6'
 set firewall ipv6 forward filter rule 200 outbound-interface name 'eth0'
+
+# Rule 210: Drop IoT to Internet
+set firewall ipv4 forward filter rule 210 action 'drop'
+set firewall ipv4 forward filter rule 210 description 'Drop IoT to Internet'
+set firewall ipv4 forward filter rule 210 source group network-group 'VLAN80'
+set firewall ipv4 forward filter rule 210 outbound-interface name 'eth0'
+
+set firewall ipv6 forward filter rule 210 action 'drop'
+set firewall ipv6 forward filter rule 210 description 'Drop IoT to Internet'
+set firewall ipv6 forward filter rule 210 source group network-group 'VLAN80_V6'
+set firewall ipv6 forward filter rule 210 outbound-interface name 'eth0'
 
 # Rule 1000: Allow all forwarding traffic from wg0
 set firewall ipv4 forward filter rule 1000 action 'accept'
@@ -741,12 +775,24 @@ save
 ### Static IP (IPv4) ###
 ########################
 
-#echo "Configuring: Static IP (IPv4)..."
+# Samsung AC (home-ac)
+set service dhcp-server shared-network-name VLAN80 subnet 10.80.0.0/16 static-mapping home-ac ip-address '10.80.100.1'
+set service dhcp-server shared-network-name VLAN80 subnet 10.80.0.0/16 static-mapping home-ac mac '50:fd:d5:c8:81:a8'
 
-#set service dhcp-server shared-network-name VLAN20 subnet 10.20.0.0/16 static-mapping Yongj-PC ip-address '10.20.10.100'
-#set service dhcp-server shared-network-name VLAN20 subnet 10.20.0.0/16 static-mapping Yongj-PC mac-address '00:11:22:33:44:55'
+# Tapo C100 (cam-01)
+set service dhcp-server shared-network-name VLAN80 subnet 10.80.0.0/16 static-mapping cam-01 ip-address '10.80.200.10'
+set service dhcp-server shared-network-name VLAN80 subnet 10.80.0.0/16 static-mapping cam-01 mac '98:03:8e:a4:42:a4'
 
-#commit comment 'dhcp-server: Configure IPv4 static IPs'
+commit comment 'dhcp-server: Configure IPv4 static IPs'
+save
+
+
+
+########################
+### Static IP (IPv4) ###
+########################
+
+#commit comment 'dhcp-server: Configure IPv6 static IPs'
 #save
 
 
