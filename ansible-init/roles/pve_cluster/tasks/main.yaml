@@ -4,7 +4,7 @@
     pvesh create /cluster/config \
       --clustername "darak-cluster" \
       --link0 "10.10.10.{{ ansible_host.split('.')[-1] }}" \
-      --link1 "fdab:d9c3:fb50:10::10:{{ ansible_host.split('.')[-1] }}"
+      --link1 "fdab:d9c3:fb50:10:10::{{ ansible_host.split('.')[-1] }}"
   args:
     creates: /etc/pve/corosync.conf
   when: inventory_hostname == ansible_play_hosts[0]
@@ -33,7 +33,7 @@
       --password "{{ pve.password }}" \
       --fingerprint "{{ (hostvars[ansible_play_hosts[0]]['pve_join_info'].nodelist | selectattr('name', 'equalto', hostvars[ansible_play_hosts[0]]['pve_join_info'].preferred_node) | map(attribute='pve_fp') | first) }}" \
       --link0 "10.10.10.{{ ansible_host.split('.')[-1] }}" \
-      --link1 "fdab:d9c3:fb50:10::10:{{ ansible_host.split('.')[-1] }}"
+      --link1 "fdab:d9c3:fb50:10:10::{{ ansible_host.split('.')[-1] }}"
 
     sleep 20
   args:
