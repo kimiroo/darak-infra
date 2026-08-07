@@ -55,6 +55,13 @@
         --timezone "Asia/Seoul" \
         --run-command 'dnf config-manager --setopt fastestmirror=1 --save' \
         --run-command 'sed -i "/^mirrorlist=/s/\$/\&country=KR/" /etc/yum.repos.d/rocky*.repo' \
+        --run-command 'systemctl enable fstrim.timer' \
+        --edit '/etc/fstab: s/\bdefaults\b/defaults,noatime/' \
+        --write '/etc/sysctl.d/99-swappiness.conf:vm.swappiness = 1' \
+        --run-command 'mkdir -p /etc/systemd/journald.conf.d' \
+        --write '/etc/systemd/journald.conf.d/volatile.conf:[Journal]\nStorage=volatile' \
+        --run-command 'mkdir -p /var/log/pods' \
+        --run-command 'echo "tmpfs /var/log/pods tmpfs defaults,noatime,size=512M 0 0" >> /etc/fstab' \
         --run-command 'cloud-init clean' \
         --run-command 'truncate -s 0 /etc/machine-id' \
         --run-command 'rm -rf /var/lib/cloud/instances/*' \
