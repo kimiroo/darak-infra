@@ -11,30 +11,33 @@ base:
 
   # cloud-init
   username: yongj
-  searchdomain: vm.internal.darak.cc
+  searchdomain: internal.darak.dev
 
 k3s_master:
   # VM
   cores: 1
   memory: 4096
-  gateway: 10.5.0.254
-  storage: nvme-lvm-thin
+  gateway: 10.10.0.1
+  gateway6: fdab:d9c3:fb50:10::1
+  storage: nvme-lvm
   start: false
 
 k3s_worker:
   # VM
   cores: 2
   memory: 8192
-  gateway: 10.5.0.254
-  storage: nvme-lvm-thin
+  gateway: 10.10.0.1
+  gateway6: fdab:d9c3:fb50:10::1
+  storage: nvme-lvm
   start: false
 
 docker:
   # VM
   cores: 3
   memory: 6144
-  gateway: 10.5.0.254
-  storage: nvme-lvm-thin
+  gateway: 10.10.0.1
+  gateway6: fdab:d9c3:fb50:10::1
+  storage: nvme-lvm
   start: false
   devices:
     - -usb0 host=1a86:7523,usb3=0

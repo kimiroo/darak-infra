@@ -13,7 +13,11 @@
 
 - name: Set K3s master VM IPv4 address
   ansible.builtin.set_fact:
-    vm_ip: "10.5.47.{{ node_id }}1/16"
+    vm_ip: "10.10.20.{{ node_id }}1/16"
+
+- name: Set K3s master VM IPv6 address
+  ansible.builtin.set_fact:
+    vm_ip6: "fdab:d9c3:fb50:10:20::{{ node_id }}1/64"
 
 - name: Set K3s master VM tags
   ansible.builtin.set_fact:
@@ -40,6 +44,6 @@
   ansible.builtin.command: >
     qm set {{ vm_id }} \
       --cores {{ k3s_master.cores }} --memory {{ k3s_master.memory }} \
-      --ipconfig0 ip={{ vm_ip }},gw={{ k3s_master.gateway }} \
+      --ipconfig0 ip={{ vm_ip }},gw={{ k3s_master.gateway }},ip6={{ vm_ip6 }},gw6={{ k3s_master.gateway6 }} \
       --tags {{ vm_tags }} \
       --onboot 1
