@@ -926,7 +926,9 @@ set policy prefix-list6 K3S_VIP_ALLOWED_V6 rule 20 prefix 'fdab:d9c3:fb50:10:200
 # Bind Prefix-Lists to a Route-Map for inbound BGP filtering
 set policy route-map K3S_INBOUND_FILTER rule 10 action 'permit'
 set policy route-map K3S_INBOUND_FILTER rule 10 match ip address prefix-list 'K3S_VIP_ALLOWED_V4'
-set policy route-map K3S_INBOUND_FILTER rule 10 match ipv6 address prefix-list 'K3S_VIP_ALLOWED_V6'
+
+set policy route-map K3S_INBOUND_FILTER rule 20 action 'permit'
+set policy route-map K3S_INBOUND_FILTER rule 20 match ipv6 address prefix-list 'K3S_VIP_ALLOWED_V6'
 
 # ==================================================
 # 2. Global BGP Settings & Dual-Stack ECMP
