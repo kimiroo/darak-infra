@@ -169,7 +169,7 @@ set interface bridge br0 member interface eth3 allowed-vlan 99
 set interface bridge br0 member interface eth4 native-vlan 30
 
 # eth5 (Printer)
-set interface bridge br0 member interface eth5 native-vlan 80
+set interface bridge br0 member interface eth5 native-vlan 81
 
 # Set subnet for VLANs
 set interface bridge br0 vif 5 address '10.5.0.1/16'   # Network
@@ -189,6 +189,9 @@ set interface bridge br0 vif 70 address 'fdab:d9c3:fb50:70::1/64'
 
 set interface bridge br0 vif 80 address '10.80.0.1/16' # IoT
 set interface bridge br0 vif 80 address 'fdab:d9c3:fb50:80::1/64'
+
+set interface bridge br0 vif 81 address '10.81.0.1/16' # Printer
+#set interface bridge br0 vif 81 address 'fdab:d9c3:fb50:81::1/64'
 
 set interface bridge br0 vif 90 address '10.90.0.1/16' # Guest
 set interface bridge br0 vif 90 address 'fdab:d9c3:fb50:90::1/64'
@@ -238,6 +241,12 @@ set service router-advert interface br0.70 name-server 2a07:a8c1::4d:fa1f
 set service router-advert interface br0.70 dnssl 'internal.darak.dev'
 
 # VLAN 80 (IoT)
+set service router-advert interface br0.80 prefix fdab:d9c3:fb50:80::/64
+set service router-advert interface br0.80 name-server 2a07:a8c0::5a:4515
+set service router-advert interface br0.80 name-server 2a07:a8c1::5a:4515
+set service router-advert interface br0.80 dnssl 'internal.darak.dev'
+
+# VLAN 81 (Printer)
 #set service router-advert interface br0.80 prefix fdab:d9c3:fb50:80::/64
 #set service router-advert interface br0.80 name-server 2a07:a8c0::5a:4515
 #set service router-advert interface br0.80 name-server 2a07:a8c1::5a:4515
@@ -319,6 +328,17 @@ set service dhcp-server shared-network-name VLAN80 subnet 10.80.0.0/16 option do
 set service dhcp-server shared-network-name VLAN80 subnet 10.80.0.0/16 range 0 start 10.80.20.100
 set service dhcp-server shared-network-name VLAN80 subnet 10.80.0.0/16 range 0 stop 10.80.20.250
 
+# VLAN 81 (Printer)
+set service dhcp-server shared-network-name VLAN81 subnet 10.81.0.0/16 subnet-id 81
+
+set service dhcp-server shared-network-name VLAN81 subnet 10.81.0.0/16 option default-router 10.81.0.1
+set service dhcp-server shared-network-name VLAN81 subnet 10.81.0.0/16 option name-server 45.90.28.222
+set service dhcp-server shared-network-name VLAN81 subnet 10.81.0.0/16 option name-server 45.90.30.222
+set service dhcp-server shared-network-name VLAN81 subnet 10.81.0.0/16 option domain-name 'internal.darak.dev'
+
+set service dhcp-server shared-network-name VLAN81 subnet 10.81.0.0/16 range 0 start 10.81.20.100
+set service dhcp-server shared-network-name VLAN81 subnet 10.81.0.0/16 range 0 stop 10.81.20.250
+
 # VLAN 90 (Guest)
 set service dhcp-server shared-network-name VLAN90 subnet 10.90.0.0/16 subnet-id 90
 
@@ -344,25 +364,6 @@ set service dhcp-server hostfile-update
 
 commit comment 'dhcp-server: Configure DHCP server'
 save
-
-
-
-###################
-### DHCP (IPv6) ###
-###################
-
-echo "Configuring: DHCP (IPv6 Only)..."
-
-# VLAN 80 (IoT)
-set service dhcpv6-server shared-network-name VLAN80 subnet fdab:d9c3:fb50:80::/64 subnet-id 10
-
-set service dhcpv6-server shared-network-name VLAN80 subnet fdab:d9c3:fb50:80::/64 option name-server 2a07:a8c0::5a:4515
-set service dhcpv6-server shared-network-name VLAN80 subnet fdab:d9c3:fb50:80::/64 option name-server 2a07:a8c1::5a:4515
-
-set service dhcpv6-server shared-network-name VLAN80 subnet fdab:d9c3:fb50:80::/64 range 0 start fdab:d9c3:fb50:80:20::100
-set service dhcpv6-server shared-network-name VLAN80 subnet fdab:d9c3:fb50:80::/64 range 0 stop fdab:d9c3:fb50:80:20::250
-
-commit comment 'dhcpv6-server: Configure DHCPv6 server'
 
 
 
@@ -392,6 +393,7 @@ set firewall group network-group VLAN20 network '10.20.0.0/16' # Admin
 set firewall group network-group VLAN30 network '10.30.0.0/16' # Family
 set firewall group network-group VLAN70 network '10.70.0.0/16' # Trusted Guest
 set firewall group network-group VLAN80 network '10.80.0.0/16' # IoT
+set firewall group network-group VLAN81 network '10.81.0.0/16' # Printer
 set firewall group network-group VLAN90 network '10.90.0.0/16' # Guest
 set firewall group network-group VLAN99 network '10.99.0.0/16' # Limbo
 
@@ -402,6 +404,7 @@ set firewall group ipv6-network-group VLAN20_V6 network 'fdab:d9c3:fb50:20::/64'
 set firewall group ipv6-network-group VLAN30_V6 network 'fdab:d9c3:fb50:30::/64' # Family
 set firewall group ipv6-network-group VLAN70_V6 network 'fdab:d9c3:fb50:70::/64' # Trusted Guest
 set firewall group ipv6-network-group VLAN80_V6 network 'fdab:d9c3:fb50:80::/64' # IoT
+#set firewall group ipv6-network-group VLAN81_V6 network 'fdab:d9c3:fb50:81::/64' # Printer
 set firewall group ipv6-network-group VLAN90_V6 network 'fdab:d9c3:fb50:90::/64' # Guest
 set firewall group ipv6-network-group VLAN99_V6 network 'fdab:d9c3:fb50:99::/64' # Limbo
 
@@ -413,6 +416,7 @@ set firewall group interface-group LOCAL_INTERFACES interface 'br0.20'
 set firewall group interface-group LOCAL_INTERFACES interface 'br0.30'
 set firewall group interface-group LOCAL_INTERFACES interface 'br0.70'
 set firewall group interface-group LOCAL_INTERFACES interface 'br0.80'
+set firewall group interface-group LOCAL_INTERFACES interface 'br0.81'
 set firewall group interface-group LOCAL_INTERFACES interface 'br0.90'
 set firewall group interface-group LOCAL_INTERFACES interface 'br0.99'
 
@@ -448,6 +452,10 @@ set firewall group ipv6-address-group ROCKY_K3S_NODES_V6 address 'fdab:d9c3:fb50
 set firewall group ipv6-address-group ROCKY_K3S_NODES_V6 address 'fdab:d9c3:fb50:10:20::32'
 set firewall group ipv6-address-group ROCKY_DOCKER_01_V6 address 'fdab:d9c3:fb50:10:20::41'
 
+# K3s VIP Definition
+set firewall group network-group K3S_VIP network '10.45.0.0/16'
+set firewall group ipv6-network-group K3S_VIP_V6 network 'fdab:d9c3:fb50:45::/64'
+
 # VPN Definition
 set firewall group network-group ADMIN_VPN_RANGE network '10.7.10.0/24'
 set firewall group ipv6-network-group ADMIN_VPN_RANGE_V6 network 'fdab:d9c3:fb50:7:10::/80'
@@ -474,16 +482,14 @@ set firewall group network-group INTERNAL_NETWORKS network '10.0.0.0/8'
 set firewall group ipv6-network-group INTERNAL_NETWORKS_V6 network 'fdab:d9c3:fb50::/48'
 
 # Printer Assets
-set firewall group address-group PRINTER_IP address '10.80.0.100'
-set firewall group ipv6-address-group PRINTER_IP_V6 address 'fdab:d9c3:fb50:80::100'
-
-set firewall group port-group PRINTER_PORTS port '9100'
-set firewall group port-group PRINTER_PORTS port '631'
-
+set firewall group network-group TRUSTED_PRINT_SOURCES network '10.7.0.0/16'
 set firewall group network-group TRUSTED_PRINT_SOURCES network '10.10.0.0/16'
+set firewall group network-group TRUSTED_PRINT_SOURCES network '10.20.0.0/16'
 set firewall group network-group TRUSTED_PRINT_SOURCES network '10.30.0.0/16'
-set firewall group ipv6-network-group TRUSTED_PRINT_SOURCES_V6 network 'fdab:d9c3:fb50:10::/64'
-set firewall group ipv6-network-group TRUSTED_PRINT_SOURCES_V6 network 'fdab:d9c3:fb50:30::/64'
+#set firewall group ipv6-network-group TRUSTED_PRINT_SOURCES_V6 network 'fdab:d9c3:fb50:7::/64'
+#set firewall group ipv6-network-group TRUSTED_PRINT_SOURCES_V6 network 'fdab:d9c3:fb50:10::/64'
+#set firewall group ipv6-network-group TRUSTED_PRINT_SOURCES_V6 network 'fdab:d9c3:fb50:20::/64'
+#set firewall group ipv6-network-group TRUSTED_PRINT_SOURCES_V6 network 'fdab:d9c3:fb50:30::/64'
 
 # RADIUS Configuration
 set firewall group port-group RADIUS_PORTS port '1812'
@@ -579,6 +585,58 @@ set firewall ipv6 input filter rule 41 source group network-group 'ADMIN_VPN_RAN
 set firewall ipv6 input filter rule 41 destination port '22'
 set firewall ipv6 input filter rule 41 protocol 'tcp'
 
+# Rule 50: Allow BGP (VLAN10)
+set firewall ipv4 input filter rule 50 action 'accept'
+set firewall ipv4 input filter rule 50 description 'Allow BGP'
+set firewall ipv4 input filter rule 50 source group network-group 'VLAN10'
+set firewall ipv4 input filter rule 50 destination port '179'
+set firewall ipv4 input filter rule 50 protocol 'tcp'
+
+set firewall ipv6 input filter rule 50 action 'accept'
+set firewall ipv6 input filter rule 50 description 'Allow BGP IPv6'
+set firewall ipv6 input filter rule 50 source group network-group 'VLAN10_V6'
+set firewall ipv6 input filter rule 50 destination port '179'
+set firewall ipv6 input filter rule 50 protocol 'tcp'
+
+# Rule 60: Allow K3s Control Plane API from K3s nodes
+set firewall ipv4 input filter rule 60 action 'accept'
+set firewall ipv4 input filter rule 60 description 'Allow k3s API HAProxy VIP from K3s nodes'
+set firewall ipv4 input filter rule 60 source group address-group 'ROCKY_K3S_NODES'
+set firewall ipv4 input filter rule 60 destination port '6443'
+set firewall ipv4 input filter rule 60 protocol 'tcp'
+
+set firewall ipv6 input filter rule 60 action 'accept'
+set firewall ipv6 input filter rule 60 description 'Allow k3s API HAProxy VIP from K3s nodes'
+set firewall ipv6 input filter rule 60 source group address-group 'ROCKY_K3S_NODES_V6'
+set firewall ipv6 input filter rule 60 destination port '6443'
+set firewall ipv6 input filter rule 60 protocol 'tcp'
+
+# Rule 61: Allow K3s Control Plane API from VLAN20
+set firewall ipv4 input filter rule 61 action 'accept'
+set firewall ipv4 input filter rule 61 description 'Allow k3s API HAProxy VIP from VLAN20'
+set firewall ipv4 input filter rule 61 source group network-group 'VLAN20'
+set firewall ipv4 input filter rule 61 destination port '6443'
+set firewall ipv4 input filter rule 61 protocol 'tcp'
+
+set firewall ipv6 input filter rule 61 action 'accept'
+set firewall ipv6 input filter rule 61 description 'Allow k3s API HAProxy VIP from VLAN20'
+set firewall ipv6 input filter rule 61 source group network-group 'VLAN20_V6'
+set firewall ipv6 input filter rule 61 destination port '6443'
+set firewall ipv6 input filter rule 61 protocol 'tcp'
+
+# Rule 62: Allow K3s Control Plane API from Admin VPN range
+set firewall ipv4 input filter rule 62 action 'accept'
+set firewall ipv4 input filter rule 62 description 'Allow k3s API HAProxy VIP from Admin VPN range'
+set firewall ipv4 input filter rule 62 source group network-group 'ADMIN_VPN_RANGE'
+set firewall ipv4 input filter rule 62 destination port '6443'
+set firewall ipv4 input filter rule 62 protocol 'tcp'
+
+set firewall ipv6 input filter rule 62 action 'accept'
+set firewall ipv6 input filter rule 62 description 'Allow k3s API HAProxy VIP from Admin VPN range'
+set firewall ipv6 input filter rule 62 source group network-group 'ADMIN_VPN_RANGE_V6'
+set firewall ipv6 input filter rule 62 destination port '6443'
+set firewall ipv6 input filter rule 62 protocol 'tcp'
+
 # Rule 999: Baseline drop for all unauthorized WAN traffic to the router
 set firewall ipv4 input filter rule 999 action 'drop'
 set firewall ipv4 input filter rule 999 description 'Drop all other unallowed WAN traffic to Router'
@@ -613,35 +671,16 @@ set firewall ipv6 forward filter rule 110 description 'VPN Specific to Internal 
 set firewall ipv6 forward filter rule 110 source group network-group 'ADMIN_VPN_RANGE_V6'
 set firewall ipv6 forward filter rule 110 destination group network-group 'ADMIN_DESTINATIONS_V6'
 
-# Rule 120: [Printer] Trusted VLANs (10, 30) -> Printer Secure Ports
+# Rule 120: [Printer] Trusted VLANs (10, 30) -> Printer (VLAN81)
 set firewall ipv4 forward filter rule 120 action 'accept'
-set firewall ipv4 forward filter rule 120 description 'Trusted Networks to Printer Secure Ports'
+set firewall ipv4 forward filter rule 120 description 'Trusted Networks to Printer'
 set firewall ipv4 forward filter rule 120 source group network-group 'TRUSTED_PRINT_SOURCES'
-set firewall ipv4 forward filter rule 120 destination group address-group 'PRINTER_IP'
-set firewall ipv4 forward filter rule 120 protocol 'tcp'
-set firewall ipv4 forward filter rule 120 destination group port-group 'PRINTER_PORTS'
+set firewall ipv4 forward filter rule 120 destination group network-group 'VLAN81'
 
-set firewall ipv6 forward filter rule 120 action 'accept'
-set firewall ipv6 forward filter rule 120 description 'Trusted Networks to Printer Secure Ports'
-set firewall ipv6 forward filter rule 120 source group network-group 'TRUSTED_PRINT_SOURCES_V6'
-set firewall ipv6 forward filter rule 120 destination group address-group 'PRINTER_IP_V6'
-set firewall ipv6 forward filter rule 120 protocol 'tcp'
-set firewall ipv6 forward filter rule 120 destination group port-group 'PRINTER_PORTS'
-
-# Rule 121: [Printer] Admin VPN (VLAN 7) -> Printer Secure Ports
-set firewall ipv4 forward filter rule 121 action 'accept'
-set firewall ipv4 forward filter rule 121 description 'VPN to Printer Secure Ports'
-set firewall ipv4 forward filter rule 121 source group network-group 'ADMIN_VPN_RANGE'
-set firewall ipv4 forward filter rule 121 destination group address-group 'PRINTER_IP'
-set firewall ipv4 forward filter rule 121 protocol 'tcp'
-set firewall ipv4 forward filter rule 121 destination group port-group 'PRINTER_PORTS'
-
-set firewall ipv6 forward filter rule 121 action 'accept'
-set firewall ipv6 forward filter rule 121 description 'VPN to Printer Secure Ports'
-set firewall ipv6 forward filter rule 121 source group network-group 'ADMIN_VPN_RANGE_V6'
-set firewall ipv6 forward filter rule 121 destination group address-group 'PRINTER_IP_V6'
-set firewall ipv6 forward filter rule 121 protocol 'tcp'
-set firewall ipv6 forward filter rule 121 destination group port-group 'PRINTER_PORTS'
+#set firewall ipv6 forward filter rule 120 action 'accept'
+#set firewall ipv6 forward filter rule 120 description 'Trusted Networks to Printer'
+#set firewall ipv6 forward filter rule 120 source group network-group 'TRUSTED_PRINT_SOURCES_V6'
+#set firewall ipv6 forward filter rule 120 destination group network-group 'VLAN81_V6'
 
 # Rule 130: [Ansible] pi-node-01 -> VLAN 5 SSH Management
 set firewall ipv4 forward filter rule 130 action 'accept'
@@ -703,7 +742,7 @@ set firewall ipv6 forward filter rule 160 destination group network-group 'VLAN8
 set firewall ipv6 forward filter rule 160 protocol 'udp'
 set firewall ipv6 forward filter rule 160 destination port '5540'
 
-# Rule 200: Drop IoT to Internet
+# Rule 200: Allow Cloud IoT devices to access Internet
 set firewall ipv4 forward filter rule 200 action 'accept'
 set firewall ipv4 forward filter rule 200 description 'Allow Cloud IoT devices to access Internet'
 set firewall ipv4 forward filter rule 200 source group network-group 'CLOUD_IOT'
@@ -724,6 +763,17 @@ set firewall ipv6 forward filter rule 210 action 'drop'
 set firewall ipv6 forward filter rule 210 description 'Drop IoT to Internet'
 set firewall ipv6 forward filter rule 210 source group network-group 'VLAN80_V6'
 set firewall ipv6 forward filter rule 210 outbound-interface name 'eth0'
+
+# Rule 220: Drop Printer to Internet
+set firewall ipv4 forward filter rule 220 action 'drop'
+set firewall ipv4 forward filter rule 220 description 'Drop IoT to Internet'
+set firewall ipv4 forward filter rule 220 source group network-group 'VLAN81'
+set firewall ipv4 forward filter rule 220 outbound-interface name 'eth0'
+
+#set firewall ipv6 forward filter rule 220 action 'drop'
+#set firewall ipv6 forward filter rule 220 description 'Drop IoT to Internet'
+#set firewall ipv6 forward filter rule 220 source group network-group 'VLAN81_V6'
+#set firewall ipv6 forward filter rule 220 outbound-interface name 'eth0'
 
 # Rule 1000: Allow all forwarding traffic from wg0
 set firewall ipv4 forward filter rule 1000 action 'accept'
@@ -774,6 +824,10 @@ save
 ########################
 ### Static IP (IPv4) ###
 ########################
+
+# SL-T2270DW (printer)
+set service dhcp-server shared-network-name VLAN81 subnet 10.81.0.0/16 static-mapping printer ip-address '10.81.0.100'
+set service dhcp-server shared-network-name VLAN81 subnet 10.81.0.0/16 static-mapping printer mac 'd0:ad:08:f9:87:83'
 
 # Samsung AC (home-ac)
 set service dhcp-server shared-network-name VLAN80 subnet 10.80.0.0/16 static-mapping home-ac ip-address '10.80.100.1'
@@ -905,23 +959,17 @@ echo "Configuring: BGP..."
 # 1. BGP Security Policies (Prefix-Lists & Route-Maps)
 # ==================================================
 
-# Define allowed IPv4 prefixes for K3s Services and Control Plane
+# Define allowed IPv4 prefixes for K3s Services
 set policy prefix-list K3S_VIP_ALLOWED_V4 rule 10 action 'permit'
-set policy prefix-list K3S_VIP_ALLOWED_V4 rule 10 prefix '10.10.100.0/24'
+set policy prefix-list K3S_VIP_ALLOWED_V4 rule 10 prefix '10.45.10.0/24'
 set policy prefix-list K3S_VIP_ALLOWED_V4 rule 10 ge 24
 set policy prefix-list K3S_VIP_ALLOWED_V4 rule 10 le 32
 
-set policy prefix-list K3S_VIP_ALLOWED_V4 rule 20 action 'permit'
-set policy prefix-list K3S_VIP_ALLOWED_V4 rule 20 prefix '10.10.200.1/32'
-
-# Define allowed IPv6 prefixes for K3s Services and Control Plane (ULA Range)
+# Define allowed IPv6 prefixes for K3s Services (ULA Range)
 set policy prefix-list6 K3S_VIP_ALLOWED_V6 rule 10 action 'permit'
-set policy prefix-list6 K3S_VIP_ALLOWED_V6 rule 10 prefix 'fdab:d9c3:fb50:10:100::/80'
+set policy prefix-list6 K3S_VIP_ALLOWED_V6 rule 10 prefix 'fdab:d9c3:fb50:45:10::/80'
 set policy prefix-list6 K3S_VIP_ALLOWED_V6 rule 10 ge 80
 set policy prefix-list6 K3S_VIP_ALLOWED_V6 rule 10 le 128
-
-set policy prefix-list6 K3S_VIP_ALLOWED_V6 rule 20 action 'permit'
-set policy prefix-list6 K3S_VIP_ALLOWED_V6 rule 20 prefix 'fdab:d9c3:fb50:10:200::1/128'
 
 # Bind Prefix-Lists to a Route-Map for inbound BGP filtering
 set policy route-map K3S_INBOUND_FILTER rule 10 action 'permit'
@@ -943,31 +991,116 @@ set protocols bgp address-family ipv6-unicast maximum-paths ebgp '64'
 set protocols bgp parameters bestpath as-path multipath-relax
 
 # ==================================================
-# 3. K3s Peer-Group Definition (MP-BGP over IPv4 Transport)
+# 3. IPv4 Peer-Group & Neighbors
 # ==================================================
+set protocols bgp peer-group K3S_NODES_V4 remote-as '64513'
+set protocols bgp peer-group K3S_NODES_V4 address-family ipv4-unicast route-map import 'K3S_INBOUND_FILTER'
+set protocols bgp peer-group K3S_NODES_V4 address-family ipv4-unicast soft-reconfiguration inbound
 
-# Create a common BGP Peer-Group for Calico nodes
-set protocols bgp peer-group K3S_NODES remote-as '64513'
-
-# Activate IPv4 payload exchange and apply inbound filters
-set protocols bgp peer-group K3S_NODES address-family ipv4-unicast route-map import 'K3S_INBOUND_FILTER'
-set protocols bgp peer-group K3S_NODES address-family ipv4-unicast soft-reconfiguration inbound
-
-# Activate IPv6 payload exchange (via MP-BGP) and apply inbound filters
-set protocols bgp peer-group K3S_NODES address-family ipv6-unicast route-map import 'K3S_INBOUND_FILTER'
-set protocols bgp peer-group K3S_NODES address-family ipv6-unicast soft-reconfiguration inbound
+set protocols bgp neighbor 10.10.20.11 peer-group 'K3S_NODES_V4'
+set protocols bgp neighbor 10.10.20.12 peer-group 'K3S_NODES_V4'
+set protocols bgp neighbor 10.10.20.21 peer-group 'K3S_NODES_V4'
+set protocols bgp neighbor 10.10.20.22 peer-group 'K3S_NODES_V4'
+set protocols bgp neighbor 10.10.20.31 peer-group 'K3S_NODES_V4'
+set protocols bgp neighbor 10.10.20.32 peer-group 'K3S_NODES_V4'
 
 # ==================================================
-# 4. K3s Node Neighbors Assignment (ROCKY_K3S_NODES)
+# 4. IPv6 Peer-Group & Neighbors
 # ==================================================
+set protocols bgp peer-group K3S_NODES_V6 remote-as '64513'
+set protocols bgp peer-group K3S_NODES_V6 address-family ipv6-unicast route-map import 'K3S_INBOUND_FILTER'
+set protocols bgp peer-group K3S_NODES_V6 address-family ipv6-unicast soft-reconfiguration inbound
 
-# Bind physical node IPv4 addresses to establish the TCP/179 BGP sessions
-set protocols bgp neighbor 10.10.20.11 peer-group 'K3S_NODES'
-set protocols bgp neighbor 10.10.20.12 peer-group 'K3S_NODES'
-set protocols bgp neighbor 10.10.20.21 peer-group 'K3S_NODES'
-set protocols bgp neighbor 10.10.20.22 peer-group 'K3S_NODES'
-set protocols bgp neighbor 10.10.20.31 peer-group 'K3S_NODES'
-set protocols bgp neighbor 10.10.20.32 peer-group 'K3S_NODES'
+set protocols bgp neighbor fdab:d9c3:fb50:10:20::11 peer-group 'K3S_NODES_V6'
+set protocols bgp neighbor fdab:d9c3:fb50:10:20::12 peer-group 'K3S_NODES_V6'
+set protocols bgp neighbor fdab:d9c3:fb50:10:20::21 peer-group 'K3S_NODES_V6'
+set protocols bgp neighbor fdab:d9c3:fb50:10:20::22 peer-group 'K3S_NODES_V6'
+set protocols bgp neighbor fdab:d9c3:fb50:10:20::31 peer-group 'K3S_NODES_V6'
+set protocols bgp neighbor fdab:d9c3:fb50:10:20::32 peer-group 'K3S_NODES_V6'
 
 commit comment 'bgp: Deploy Dual-Stack BGP config with ECMP and K3s prefix limits'
+save
+
+
+
+###############
+### HAProxy ###
+###############
+
+echo "Configuring: HAProxy..."
+
+# ==================================================
+# 1. Dummy interface for HAProxy
+# ==================================================
+set interfaces dummy dum0 address '10.45.20.1/32'
+set interfaces dummy dum0 address 'fdab:d9c3:fb50:45:20::1/128'
+
+# ==================================================
+# 2. HAProxy Config File
+# ==================================================
+
+mkdir -p /config/haproxy
+
+tee /config/haproxy/haproxy.cfg << EOF
+global
+    maxconn 4096
+
+defaults
+    log global
+    mode tcp
+    timeout connect 5s
+    timeout client 86400s
+    timeout server 86400s
+
+frontend k3s-api
+    bind 10.45.20.1:6443
+    mode tcp
+    default_backend k3s-api-backend
+
+backend k3s-api-backend
+    mode tcp
+    balance roundrobin
+    option httpchk GET /readyz
+    http-check expect status 401
+    default-server check-ssl verify none inter 2s fall 2 rise 2
+    server master-01 10.10.20.11:6443 check
+    server master-02 10.10.20.21:6443 check
+    server master-03 10.10.20.31:6443 check
+EOF
+
+# ==================================================
+# 3. HAProxy Container
+# ==================================================
+
+run add container image 'docker.io/library/haproxy:lts'
+
+set container name k3s-api-haproxy image 'docker.io/library/haproxy:lts'
+set container name k3s-api-haproxy allow-host-networks
+set container name k3s-api-haproxy volume cfg source '/config/haproxy/haproxy.cfg'
+set container name k3s-api-haproxy volume cfg destination '/usr/local/etc/haproxy/haproxy.cfg'
+set container name k3s-api-haproxy volume cfg mode 'ro'
+
+# ==================================================
+# 3. HAProxy Container Updater
+# ==================================================
+
+# Updater script
+mkdir -p /config/scripts/updater
+
+tee /config/scripts/updater/haproxy.sh << EOF
+#!/bin/vbash
+
+source /opt/vyatta/etc/functions/script-template
+
+run update container image k3s-api-haproxy
+run restart container k3s-api-haproxy
+EOF
+
+chmod +x /config/scripts/updater/haproxy.sh
+
+# Cronjob
+set system task-scheduler task haproxy-updater crontab-spec '0 4 * * 0'
+set system task-scheduler task haproxy-updater executable path '/config/scripts/updater/haproxy.sh'
+
+commit comment 'haproxy: Configure HAProxy Load-balancer for K3s control plane'
 save
