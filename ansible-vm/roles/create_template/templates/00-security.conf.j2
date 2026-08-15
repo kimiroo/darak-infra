@@ -5,7 +5,7 @@ PermitRootLogin {{ 'prohibit-password' if base.username == 'root' else 'no' }}
 AllowUsers {{ base.username }}
 MaxAuthTries 3
 LoginGraceTime 60
-ClientAliveInterval 300
+ClientAliveInterval 30
 ClientAliveCountMax 0
 MaxStartups 10
 AllowTcpForwarding no
