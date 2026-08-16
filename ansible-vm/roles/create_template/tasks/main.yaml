@@ -30,10 +30,15 @@
     src: 00-security.conf.j2
     dest: /var/tmp/00-security.conf
 
-- name: Copy Chrony chrony.conf to temp directory
+- name: Copy config files to temp directory
   ansible.builtin.copy:
-    src: chrony.conf
-    dest: /var/tmp/chrony.conf
+    src: "{{ item }}"
+    dest: /var/tmp/{{ item }}
+  loop:
+    - chrony.conf
+    - override.conf
+    - vector.repo
+    - vector.yaml
 
 - name: Save authorized_keys to temp directory
   ansible.builtin.copy:
@@ -43,19 +48,31 @@
 - name: Customize base image using virt-customize
   ansible.builtin.shell: |
     virt-customize -a /var/tmp/rocky-cloud-base.qcow2 \
+        --upload /var/tmp/vector.repo:/etc/yum.repos.d/vector.repo \
+        --run-command 'chown root:root /etc/yum.repos.d/vector.repo && \
+                       chmod 644 /etc/yum.repos.d/vector.repo' \
         --uninstall cockpit-bridge,cockpit-system,cockpit-ws \
-        --install vim,wget,curl,qemu-guest-agent,microcode_ctl,chrony \
+        --install vim,wget,curl,qemu-guest-agent,microcode_ctl,chrony,vector \
+        --run-command 'mkdir -p /etc/vector && \
+                       mkdir -p /etc/systemd/system/vector.service.d' \
         --upload /var/tmp/chrony.conf:/etc/chrony.conf \
         --upload /var/tmp/00-security.conf:/etc/ssh/sshd_config.d/00-security.conf \
+        --upload /var/tmp/vector.yaml:/etc/vector/vector.yaml \
+        --upload /var/tmp/override.conf:/etc/systemd/system/vector.service.d/override.conf \
         --run-command 'chown root:root /etc/chrony.conf && \
                        chmod 644 /etc/chrony.conf' \
         --run-command 'chown root:root /etc/ssh/sshd_config.d/00-security.conf && \
                        chmod 644 /etc/ssh/sshd_config.d/00-security.conf' \
+        --run-command 'chown root:root /etc/vector/vector.yaml && \
+                       chmod 644 /etc/vector/vector.yaml' \
+        --run-command 'chown root:root /etc/systemd/system/vector.service.d/override.conf && \
+                       chmod 644 /etc/systemd/system/vector.service.d/override.conf' \
         --run-command 'systemctl enable qemu-guest-agent' \
         --timezone "Asia/Seoul" \
         --run-command 'dnf config-manager --setopt fastestmirror=1 --save' \
         --run-command 'sed -i "/^mirrorlist=/s/\$/\&country=KR/" /etc/yum.repos.d/rocky*.repo' \
         --run-command 'systemctl enable fstrim.timer' \
+        --run-command 'systemctl enable vector' \
         --edit '/etc/fstab: s/\bdefaults\b/defaults,noatime/' \
         --write '/etc/sysctl.d/99-swappiness.conf:vm.swappiness = 1' \
         --run-command 'mkdir -p /etc/systemd/journald.conf.d' \

@@ -1,0 +1,57 @@
+data_dir: /run/vector
+
+sources:
+  host_metrics:
+    type: host_metrics
+    scrape_interval_secs: 30
+    collectors:
+      - cpu
+      - disk
+      - filesystem
+      - load
+      - memory
+      - network
+    filesystem:
+      mountpoints:
+        excludes:
+          - "/run/credentials/*"
+          - "/run/docker/*"
+          - "/var/lib/docker/*"
+      filesystems:
+        excludes:
+          - "overlay"
+
+  journald:
+    type: journald
+    current_boot_only: true
+
+transforms:
+  # Explicitly set host for VictoriaLogs stream_fields (host-based indexing),
+  # as the journald source doesn't always reliably populate it.
+  add_host_label:
+    type: remap
+    inputs: [journald]
+    source: |
+      .host = get_hostname!()
+
+sinks:
+  victoriametrics:
+    type: prometheus_remote_write
+    inputs: [host_metrics]
+    endpoint: "https://metrics.o11y.internal.darak.dev/api/v1/write"
+    healthcheck:
+      enabled: false
+
+  victorialogs:
+    type: elasticsearch
+    inputs: [add_host_label]
+    endpoints:
+      - "https://logs.o11y.internal.darak.dev/insert/elasticsearch/"
+    mode: bulk
+    api_version: v8
+    healthcheck:
+      enabled: false
+    query:
+      _msg_field: message
+      _time_field: timestamp
+      _stream_fields: "host,_SYSTEMD_UNIT"
