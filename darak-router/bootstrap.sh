@@ -27,11 +27,11 @@ while [[ $# -gt 0 ]]; do
       ;;
     -h|--help)
       echo "Usage: $0 [-m 'commit comment'] [-c MINUTES] [-y|-d|--non-interactive]"
-      exit 0
+      exit
       ;;
     *)
       echo "Unknown option: $1"
-      exit 1
+      exit
       ;;
   esac
 done
@@ -49,19 +49,19 @@ configure
 # ==========================================
 
 # Base
-echo '[1/7] Configuring "Base"...'
+echo '[1/9] Configuring "Base"...'
 echo '  - [1/2] Configuring "Base"...'
 source "$SCRIPT_DIR/modules/base/base.sh"
 echo '  - [2/2] Configuring "SSH"...'
 source "$SCRIPT_DIR/modules/base/ssh.sh"
 
 # System
-echo '[2/7] Configuring "System"...'
+echo '[2/9] Configuring "System"...'
 echo '  - [1/1] Configuring "Static Host Mapping"...'
 source "$SCRIPT_DIR/modules/system/static_host_mapping.sh"
 
 # Interface
-echo '[3/7] Configuring "Interface"...'
+echo '[3/9] Configuring "Interface"...'
 echo '  - [1/4] Configuring "WAN"...'
 source "$SCRIPT_DIR/modules/interface/wan.sh"
 echo '  - [2/4] Configuring "Bridge"...'
@@ -72,7 +72,7 @@ echo '  - [4/4] Configuring "WireGuard"...'
 source "$SCRIPT_DIR/modules/interface/wireguard.sh"
 
 # Firewall
-echo '[4/7] Configuring "Firewall"...'
+echo '[4/9] Configuring "Firewall"...'
 echo '  - [1/4] Configuring "Global Rules"...'
 source "$SCRIPT_DIR/modules/firewall/global.sh"
 echo '  - [2/4] Configuring "Groups"...'
@@ -83,7 +83,7 @@ echo '  - [4/4] Configuring "Forward Filter"...'
 source "$SCRIPT_DIR/modules/firewall/forward.sh"
 
 # Service
-echo '[5/7] Configuring "Service"...'
+echo '[5/9] Configuring "Service"...'
 echo '  - [1/5] Configuring "DNS"...'
 source "$SCRIPT_DIR/modules/service/dns.sh"
 echo '  - [2/5] Configuring "Static IP"...'
@@ -96,20 +96,38 @@ echo '  - [5/5] Configuring "mDNS"...'
 source "$SCRIPT_DIR/modules/service/mdns.sh"
 
 # NAT
-echo '[6/7] Configuring "NAT"...'
+echo '[6/9] Configuring "NAT"...'
 echo '  - [1/1] Configuring "NAT"...'
 source "$SCRIPT_DIR/modules/nat/nat.sh"
 
 # BGP
-echo '[7/7] Configuring "BGP"...'
+echo '[7/9] Configuring "BGP"...'
 echo '  - [1/2] Configuring "Policy"...'
 source "$SCRIPT_DIR/modules/bgp/policy.sh"
 echo '  - [2/2] Configuring "BGP Protocol"...'
 source "$SCRIPT_DIR/modules/bgp/protocol.sh"
 
+# Container
+echo '[8/9] Configuring "Container"...'
+echo '  - [1/2] Deleting "Container" config...'
+delete container
+echo '  - [2/2] Configuring "HAProxy"...'
+source "$SCRIPT_DIR/modules/container/haproxy.sh"
+
+# Task Scheduler
+echo '[9/9] Configuring "Task Scheduler"...'
+echo '  - [1/3] Deleting "task-scheduler" config...'
+delete system task-scheduler
+echo '  - [2/3] Deleting old scripts...'
+rm -rf /config/scripts || true
+echo '  - [3/3] Configuring "haproxy-updater"...'
+source "$SCRIPT_DIR/modules/task_scheduler/haproxy_updater.sh"
+
 # ==========================================
 # Pre-commit Validation (Interactive / Non-interactive)
 # ==========================================
+
+COMMIT=true
 
 if [ "$INTERACTIVE" = true ]; then
   echo ""
@@ -123,21 +141,23 @@ if [ "$INTERACTIVE" = true ]; then
 
   read -p "Do you want to commit these changes? (y/N): " confirm
   if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+    COMMIT=false
     echo "Discarding changes and exiting..."
     discard
-    exit 0
   fi
 fi
 
-# Commit and save configurations
-if [ "$COMMIT_CONFIRM" = true ]; then
-  echo "Committing changes with confirm timer of ${COMMIT_CONFIRM_MINUTES} minute(s): '$COMMENT'..."
-  commit-confirm "$COMMIT_CONFIRM_MINUTES" comment "$COMMENT (bootstrap script)"
-  save
-else
-  echo "Committing changes with comment: '$COMMENT'..."
-  commit comment "$COMMENT (bootstrap script)"
-  save
+if [ "$COMMIT" = true ]; then
+  # Commit and save configurations
+  if [ "$COMMIT_CONFIRM" = true ]; then
+    echo "Committing changes with confirm timer of ${COMMIT_CONFIRM_MINUTES} minute(s): '$COMMENT'..."
+    commit-confirm "$COMMIT_CONFIRM_MINUTES" comment "$COMMENT (bootstrap script)"
+    save
+  else
+    echo "Committing changes with comment: '$COMMENT'..."
+    commit comment "$COMMENT (bootstrap script)"
+    save
+  fi
 fi
 
 exit

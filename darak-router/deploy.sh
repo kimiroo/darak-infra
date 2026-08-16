@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROUTER="vyos@10.5.0.1"
+ROUTER="darak-router"
 REMOTE_DIR="/tmp/router-config"
 KEY_FILE=""
 BOOTSTRAP_ARGS=()
