@@ -1,0 +1,47 @@
+---
+- name: Install Vector (RHEL)
+  ansible.builtin.include_tasks: rhel.yaml
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: Install Vector (Debian)
+  ansible.builtin.include_tasks: debian.yaml
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: Ensure /etc/vector exists
+  ansible.builtin.file:
+    path: /etc/vector
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Copy Vector config file
+  ansible.builtin.copy:
+    src: vector.yaml
+    dest: /etc/vector/vector.yaml
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Ensure vector.service.d override directory exists
+  ansible.builtin.file:
+    path: /etc/systemd/system/vector.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Create Vector service override file
+  ansible.builtin.copy:
+    src: override.conf
+    dest: /etc/systemd/system/vector.service.d/override.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Register and start Vector service
+  ansible.builtin.systemd_service:
+    name: vector
+    state: restarted
+    enabled: true
+    daemon_reload: true

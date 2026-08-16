@@ -78,3 +78,9 @@
     - secrets.yaml
   roles:
     - role: nut
+
+- name: Configure Vector
+  hosts: all
+  become: true
+  roles:
+    - role: vector

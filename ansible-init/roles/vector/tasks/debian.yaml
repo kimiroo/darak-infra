@@ -1,0 +1,31 @@
+---
+- name: Fetch and dearmor Vector APT GPG key
+  ansible.builtin.shell: |
+    curl -fsSL https://keys.datadoghq.com/DATADOG_APT_KEY_CURRENT.public | gpg --dearmor -o /usr/share/keyrings/datadog-archive-keyring.gpg
+  args:
+    creates: /usr/share/keyrings/datadog-archive-keyring.gpg
+
+- name: Set permissions on keyring
+  ansible.builtin.file:
+    path: /usr/share/keyrings/datadog-archive-keyring.gpg
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Create DEB822 Source file
+  ansible.builtin.copy:
+    src: vector.sources
+    dest: /etc/apt/sources.list.d/vector.sources
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Update APT cache
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 1
+
+- name: Install Vector
+  ansible.builtin.apt:
+    name: vector
+    state: present

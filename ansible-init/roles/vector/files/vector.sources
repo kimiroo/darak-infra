@@ -1,0 +1,5 @@
+Types: deb
+URIs: https://apt.vector.dev
+Suites: stable
+Components: vector-0
+Signed-By: /usr/share/keyrings/datadog-archive-keyring.gpg

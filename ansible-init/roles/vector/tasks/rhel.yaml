@@ -1,0 +1,14 @@
+---
+- name: Create YUM repo file
+  ansible.builtin.copy:
+    src: vector.repo
+    dest: /etc/yum.repos.d/vector.repo
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Install Vector
+  ansible.builtin.dnf:
+    name: vector
+    state: present
+    update_cache: yes
