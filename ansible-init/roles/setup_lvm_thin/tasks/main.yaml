@@ -1,11 +1,8 @@
 ---
-- name: Install Clevis TPM2 packages
+- name: Install TPM2 userspace tools
   ansible.builtin.package:
     name:
-      - clevis
-      - clevis-tpm2
-      - clevis-luks
-      - clevis-systemd
+      - tpm2-tools
     state: present
 
 - name: Nuke NVMe drive
@@ -31,24 +28,19 @@
     state: present
   no_log: true
 
-- name: Bind LUKS partition to TPM2 via Clevis (PCR 0+7)
-  ansible.builtin.shell: >
-    echo -n "{{ luks_passwords[inventory_hostname] }}" |
-    clevis luks bind -y -k - -d /dev/nvme0n1p1 tpm2 '{"pcr_bank":"sha256","pcr_ids":"0,7"}'
+- name: Enroll TPM2 keyslot via systemd-cryptenroll (PCR 0+7)
+  ansible.builtin.command: >
+    systemd-cryptenroll --tpm2-device=auto --tpm2-pcrs=0+7 /dev/nvme0n1p1
+  environment:
+    PASSWORD: "{{ luks_passwords[inventory_hostname] }}"
   no_log: true
 
-- name: Enable Clevis askpass path for automatic unlock at boot
-  ansible.builtin.systemd:
-    name: clevis-luks-askpass.path
-    enabled: true
-    state: started
-
-- name: Configure crypttab for automatic Clevis unlock
+- name: Configure crypttab for automatic TPM2 unlock
   community.general.crypttab:
     name: crypt_nvme
     backing_device: /dev/nvme0n1p1
     password: none
-    opts: discard,_netdev
+    opts: discard,tpm2-device=auto
     state: present
   no_log: true
 
