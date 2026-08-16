@@ -1,11 +1,19 @@
 ---
+- name: Backup Proxmox VE enterprise repository sources
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ item }}.bak"
+    remote_src: yes
+  loop:
+    - /etc/apt/sources.list.d/ceph.sources
+    - /etc/apt/sources.list.d/pve-enterprise.sources
+
 - name: Disable Proxmox VE enterprise repository
-  ansible.builtin.blockinfile:
+  ansible.builtin.lineinfile:
     path: "{{ item }}"
+    regexp: '^Enabled:'
+    line: 'Enabled: no'
     insertafter: EOF
-    backup: yes
-    block: |
-      Enabled: false
   loop:
     - /etc/apt/sources.list.d/ceph.sources
     - /etc/apt/sources.list.d/pve-enterprise.sources

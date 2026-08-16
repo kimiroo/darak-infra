@@ -1,16 +1,56 @@
 ---
-- name: Update Rocky Linux mirror
-  ansible.builtin.shell: |
-    sed -i.bak \
-      -e 's|^#mirrorlist|mirrorlist|g' \
-      -e 's|^baseurl|#baseurl|g' \
-      -e 's|^mirrorlist.*|&\&country=KR|g' \
-      /etc/yum.repos.d/rocky*.repo
+- name: Find Rocky Linux repo files
+  ansible.builtin.find:
+    paths: /etc/yum.repos.d
+    patterns: 'rocky*.repo'
+  register: rocky_repo_files
 
-- name: Update Rocky Linux EPEL mirror
-  ansible.builtin.shell: |
-    sed -i.bak \
-      -e 's|^#metalink|metalink|g' \
-      -e 's|^baseurl|#baseurl|g' \
-      -e 's|^metalink.*|&\&country=KR|g' \
-      /etc/yum.repos.d/epel*.repo
+- name: Enable mirrorlist line (Rocky)
+  ansible.builtin.replace:
+    path: "{{ item.path }}"
+    regexp: '^#mirrorlist'
+    replace: 'mirrorlist'
+  loop: "{{ rocky_repo_files.files }}"
+
+- name: Disable baseurl line (Rocky)
+  ansible.builtin.replace:
+    path: "{{ item.path }}"
+    regexp: '^baseurl'
+    replace: '#baseurl'
+  loop: "{{ rocky_repo_files.files }}"
+
+- name: Add KR country filter to mirrorlist (Rocky)
+  ansible.builtin.replace:
+    path: "{{ item.path }}"
+    regexp: '^(mirrorlist=(?!.*&country=KR).*)$'
+    replace: '\1&country=KR'
+    backup: yes
+  loop: "{{ rocky_repo_files.files }}"
+
+- name: Find EPEL repo files
+  ansible.builtin.find:
+    paths: /etc/yum.repos.d
+    patterns: 'epel*.repo'
+  register: epel_repo_files
+
+- name: Enable metalink line (EPEL)
+  ansible.builtin.replace:
+    path: "{{ item.path }}"
+    regexp: '^#metalink'
+    replace: 'metalink'
+  loop: "{{ epel_repo_files.files }}"
+
+- name: Disable baseurl line (EPEL)
+  ansible.builtin.replace:
+    path: "{{ item.path }}"
+    regexp: '^baseurl'
+    replace: '#baseurl'
+  loop: "{{ epel_repo_files.files }}"
+
+- name: Add KR country filter to metalink (EPEL)
+  ansible.builtin.replace:
+    path: "{{ item.path }}"
+    regexp: '^(metalink=(?!.*&country=KR).*)$'
+    replace: '\1&country=KR'
+    backup: yes
+  loop: "{{ epel_repo_files.files }}"
