@@ -53,7 +53,7 @@ set firewall group ipv6-address-group ROCKY_K3S_NODES_V6 address 'fdab:d9c3:fb50
 set firewall group ipv6-address-group ROCKY_DOCKER_01_V6 address 'fdab:d9c3:fb50:10:20::41'
 
 # Admin Allowed Destinations group
-for id in 5 10 20 30 80; do
+for id in 5 10 20 30 45 80; do
 set firewall group network-group ADMIN_DESTINATIONS network "10.${id}.0.0/16"
 set firewall group ipv6-network-group ADMIN_DESTINATIONS_V6 network "fdab:d9c3:fb50:${id}::/64"
 done
