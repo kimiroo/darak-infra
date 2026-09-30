@@ -82,6 +82,18 @@ set firewall ipv4 forward filter rule 170 action 'accept'
 set firewall ipv4 forward filter rule 170 source group address-group 'ROCKY_DOCKER_01'
 set firewall ipv4 forward filter rule 170 destination group address-group 'CAM_01'
 
+# Rule 180: [K3s] rocky-docker-01 -> K3s VIP HTTPS
+for ver in 'ipv4' 'ipv6'; do
+set firewall "${ver}" forward filter rule 180 action 'accept'
+set firewall "${ver}" forward filter rule 180 description 'rocky-docker-01 to K3s VIP HTTPS'
+set firewall "${ver}" forward filter rule 180 protocol 'tcp'
+set firewall "${ver}" forward filter rule 180 destination port '443'
+done
+set firewall ipv4 forward filter rule 180 source group address-group 'ROCKY_DOCKER_01'
+set firewall ipv4 forward filter rule 180 destination group network-group 'K3S_VIP'
+set firewall ipv6 forward filter rule 180 source group address-group 'ROCKY_DOCKER_01_V6'
+set firewall ipv6 forward filter rule 180 destination group network-group 'K3S_VIP_V6'
+
 # Rule 200: [IoT] Cloud IoT devices -> WAN
 set firewall ipv4 forward filter rule 200 action 'accept'
 set firewall ipv4 forward filter rule 200 description 'Cloud IoT devices to WAN'
