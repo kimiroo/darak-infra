@@ -109,6 +109,15 @@ done
 set firewall ipv4 input filter rule 62 source group network-group 'ADMIN_VPN_RANGE'
 set firewall ipv6 input filter rule 62 source group network-group 'ADMIN_VPN_RANGE_V6'
 
+# Rule 70: Allow mDNS (UDP 5353) from LAN for mDNS repeater
+for ver in 'ipv4' 'ipv6'; do
+set firewall "${ver}" input filter rule 70 action 'accept'
+set firewall "${ver}" input filter rule 70 description 'Allow mDNS from LAN'
+set firewall "${ver}" input filter rule 70 inbound-interface group 'LOCAL_INTERFACES'
+set firewall "${ver}" input filter rule 70 destination port '5353'
+set firewall "${ver}" input filter rule 70 protocol 'udp'
+done
+
 # Rule 999: Drop for all other unallowed WAN ingress to the router
 for ver in 'ipv4' 'ipv6'; do
 set firewall "${ver}" input filter rule 999 action 'drop'
