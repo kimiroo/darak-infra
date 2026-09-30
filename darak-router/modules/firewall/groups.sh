@@ -76,6 +76,9 @@ set firewall group ipv6-network-group ADMIN_VPN_RANGE_V6 network 'fdab:d9c3:fb50
 set firewall group network-group CLOUD_IOT network '10.80.100.0/24'
 #set firewall group ipv6-network-group CLOUD_IOT_V6 network 'fdab:d9c3:fb50:80:100::/80'
 
+# Tapo C100 (cam-01)
+set firewall group address-group CAM_01 address '10.80.200.10'
+
 # RADIUS
 #set firewall group port-group RADIUS_PORTS port '1812'
 #set firewall group port-group RADIUS_PORTS port '1813'

@@ -77,6 +77,11 @@ set firewall ipv4 forward filter rule 160 destination group network-group 'VLAN8
 set firewall ipv6 forward filter rule 160 source group address-group 'ROCKY_DOCKER_01_V6'
 set firewall ipv6 forward filter rule 160 destination group network-group 'VLAN80_V6'
 
+# Rule 170: [go2rtc] go2rtc -> cam-01 (C100)
+set firewall ipv4 forward filter rule 170 action 'accept'
+set firewall ipv4 forward filter rule 170 source group address-group 'ROCKY_DOCKER_01'
+set firewall ipv4 forward filter rule 170 destination group address-group 'CAM_01'
+
 # Rule 200: [IoT] Cloud IoT devices -> WAN
 set firewall ipv4 forward filter rule 200 action 'accept'
 set firewall ipv4 forward filter rule 200 description 'Cloud IoT devices to WAN'
