@@ -94,6 +94,17 @@ set firewall ipv4 forward filter rule 180 destination group network-group 'K3S_V
 set firewall ipv6 forward filter rule 180 source group address-group 'ROCKY_DOCKER_01_V6'
 set firewall ipv6 forward filter rule 180 destination group network-group 'K3S_VIP_V6'
 
+# Rule 190: [K3s] WAN -> Envoy Ingress VIP HTTP/HTTPS (DNAT port forward)
+for ver in 'ipv4' 'ipv6'; do
+set firewall "${ver}" forward filter rule 190 action 'accept'
+set firewall "${ver}" forward filter rule 190 description 'WAN to Envoy Ingress VIP HTTP/HTTPS'
+set firewall "${ver}" forward filter rule 190 inbound-interface name 'eth0'
+set firewall "${ver}" forward filter rule 190 protocol 'tcp'
+set firewall "${ver}" forward filter rule 190 destination port '80,443'
+done
+set firewall ipv4 forward filter rule 190 destination group address-group 'ENVOY_INGRESS_VIP'
+set firewall ipv6 forward filter rule 190 destination group address-group 'ENVOY_INGRESS_VIP_V6'
+
 # Rule 200: [IoT] Cloud IoT devices -> WAN
 set firewall ipv4 forward filter rule 200 action 'accept'
 set firewall ipv4 forward filter rule 200 description 'Cloud IoT devices to WAN'

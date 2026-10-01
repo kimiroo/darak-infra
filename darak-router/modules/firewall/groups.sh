@@ -67,6 +67,8 @@ done
 # K3s VIP Definition
 set firewall group network-group K3S_VIP network '10.45.0.0/16'
 set firewall group ipv6-network-group K3S_VIP_V6 network 'fdab:d9c3:fb50:45::/64'
+set firewall group address-group ENVOY_INGRESS_VIP address '10.45.10.100'
+set firewall group ipv6-address-group ENVOY_INGRESS_VIP_V6 address 'fdab:d9c3:fb50:45:10::100'
 
 # VPN Definition
 set firewall group network-group ADMIN_VPN_RANGE network '10.7.10.0/24'
