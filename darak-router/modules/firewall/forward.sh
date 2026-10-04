@@ -41,17 +41,17 @@ set firewall ipv4 forward filter rule 130 destination group network-group 'VLAN5
 set firewall ipv6 forward filter rule 130 source group address-group 'PI_NODE_01_V6'
 set firewall ipv6 forward filter rule 130 destination group network-group 'VLAN5_V6'
 
-# Rule 140: [RADIUS] VLAN5 -> FreeRADIUS Server
-#for ver in 'ipv4' 'ipv6'; do
-#set firewall "${ver}" forward filter rule 140 action 'accept'
-#set firewall "${ver}" forward filter rule 140 description 'VLAN5 to FreeRADIUS'
-#set firewall "${ver}" forward filter rule 140 protocol 'udp'
-#set firewall "${ver}" forward filter rule 140 destination group port-group 'RADIUS_PORTS'
-#done
-#set firewall ipv4 forward filter rule 140 source group network-group 'VLAN5'
-#set firewall ipv4 forward filter rule 140 destination address '10.20.10.50'# <-- Change to actual FreeRADIUS IP
-#set firewall ipv6 forward filter rule 140 source group network-group 'VLAN5_V6'
-#set firewall ipv6 forward filter rule 140 destination address 'fdab:d9c3:fb50:10:10::50'# <-- Change to actual FreeRADIUS IP
+# Rule 140: [RADIUS] VLAN5 (AP) -> FreeRADIUS VIP
+for ver in 'ipv4' 'ipv6'; do
+set firewall "${ver}" forward filter rule 140 action 'accept'
+set firewall "${ver}" forward filter rule 140 description 'VLAN5 (AP) to FreeRADIUS'
+set firewall "${ver}" forward filter rule 140 protocol 'udp'
+set firewall "${ver}" forward filter rule 140 destination port '1812'
+done
+set firewall ipv4 forward filter rule 140 source group network-group 'VLAN5'
+set firewall ipv4 forward filter rule 140 destination group address-group 'RADIUS_VIP'
+set firewall ipv6 forward filter rule 140 source group network-group 'VLAN5_V6'
+set firewall ipv6 forward filter rule 140 destination group address-group 'RADIUS_VIP_V6'
 
 # Rule 150: [Matter] VLAN80 (IoT) -> Matter Server
 for ver in 'ipv4' 'ipv6'; do
