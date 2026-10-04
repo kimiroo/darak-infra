@@ -116,12 +116,14 @@ source "$SCRIPT_DIR/modules/container/haproxy.sh"
 
 # Task Scheduler
 echo '[9/9] Configuring "Task Scheduler"...'
-echo '  - [1/3] Deleting "task-scheduler" config...'
+echo '  - [1/4] Deleting "task-scheduler" config...'
 delete system task-scheduler
-echo '  - [2/3] Deleting old scripts...'
+echo '  - [2/4] Deleting old scripts...'
 rm -rf /config/scripts || true
-echo '  - [3/3] Configuring "haproxy-updater"...'
+echo '  - [3/4] Configuring "haproxy-updater"...'
 source "$SCRIPT_DIR/modules/task_scheduler/haproxy_updater.sh"
+echo '  - [4/4] Configuring "wan-ip-updater"...'
+source "$SCRIPT_DIR/modules/task_scheduler/wan_ip_updater.sh"
 
 # ==========================================
 # Pre-commit Validation (Interactive / Non-interactive)
