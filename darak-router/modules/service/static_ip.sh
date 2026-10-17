@@ -11,6 +11,10 @@ set service dhcp-server shared-network-name VLAN81 subnet 10.81.0.0/16 static-ma
 set service dhcp-server shared-network-name VLAN80 subnet 10.80.0.0/16 static-mapping home-ac ip-address '10.80.100.1'
 set service dhcp-server shared-network-name VLAN80 subnet 10.80.0.0/16 static-mapping home-ac mac '50:fd:d5:c8:81:a8'
 
+# Google Nest Mini (bedroom-nest-mini)
+set service dhcp-server shared-network-name VLAN80 subnet 10.80.0.0/16 static-mapping bedroom-nest-mini ip-address '10.80.100.10'
+set service dhcp-server shared-network-name VLAN80 subnet 10.80.0.0/16 static-mapping bedroom-nest-mini mac 'd4:f5:47:37:01:58'
+
 # Tapo C100 (cam-01)
 set service dhcp-server shared-network-name VLAN80 subnet 10.80.0.0/16 static-mapping cam-01 ip-address '10.80.200.10'
 set service dhcp-server shared-network-name VLAN80 subnet 10.80.0.0/16 static-mapping cam-01 mac '98:03:8e:a4:42:a4'
