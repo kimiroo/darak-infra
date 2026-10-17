@@ -109,7 +109,7 @@ set firewall ipv4 forward filter rule 200 action 'accept'
 set firewall ipv4 forward filter rule 200 description 'HA to ESPHome API'
 set firewall ipv4 forward filter rule 200 protocol 'tcp'
 set firewall ipv4 forward filter rule 200 source group address-group 'ROCKY_DOCKER_01'
-set firewall ipv4 forward filter rule 200 destination group address-group 'VLAN80'
+set firewall ipv4 forward filter rule 200 destination group network-group 'VLAN80'
 set firewall ipv4 forward filter rule 200 destination group port-group 'ESPHOME_PORTS'
 
 # Rule 8000: [IoT] Cloud IoT devices -> WAN
