@@ -84,3 +84,8 @@ set firewall group address-group CAM_01 address '10.80.200.10'
 # RADIUS
 set firewall group address-group RADIUS_VIP address '10.45.10.110'
 set firewall group ipv6-address-group RADIUS_VIP_V6 address 'fdab:d9c3:fb50:45:10::110'
+
+# ESPHome Ports
+set firewall group port-group ESPHOME_PORTS port '6053'
+#set firewall group port-group ESPHOME_PORTS port '3232' # OTA (ESP32)
+#set firewall group port-group ESPHOME_PORTS port '8266' # OTA (ESP8266)

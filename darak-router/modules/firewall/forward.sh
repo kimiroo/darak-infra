@@ -104,38 +104,46 @@ done
 set firewall ipv4 forward filter rule 190 destination group address-group 'ENVOY_INGRESS_VIP'
 set firewall ipv6 forward filter rule 190 destination group address-group 'ENVOY_INGRESS_VIP_V6'
 
-# Rule 200: [IoT] Cloud IoT devices -> WAN
+# Rule 200: [IoT] HomeAssistant to ESPHome
 set firewall ipv4 forward filter rule 200 action 'accept'
-set firewall ipv4 forward filter rule 200 description 'Cloud IoT devices to WAN'
-set firewall ipv4 forward filter rule 200 source group network-group 'CLOUD_IOT'
-set firewall ipv4 forward filter rule 200 outbound-interface name 'eth0'
+set firewall ipv4 forward filter rule 200 description 'HA to ESPHome API'
+set firewall ipv4 forward filter rule 200 protocol 'tcp'
+set firewall ipv4 forward filter rule 200 source group address-group 'ROCKY_DOCKER_01'
+set firewall ipv4 forward filter rule 200 destination group address-group 'VLAN80'
+set firewall ipv4 forward filter rule 200 destination group port-group 'ESPHOME_PORTS'
 
-# Rule 210: [IoT] Drop IoT to Internet
+# Rule 8000: [IoT] Cloud IoT devices -> WAN
+set firewall ipv4 forward filter rule 8000 action 'accept'
+set firewall ipv4 forward filter rule 8000 description 'Cloud IoT devices to WAN'
+set firewall ipv4 forward filter rule 8000 source group network-group 'CLOUD_IOT'
+set firewall ipv4 forward filter rule 8000 outbound-interface name 'eth0'
+
+# Rule 8010: [IoT] Drop IoT to Internet
 for ver in 'ipv4' 'ipv6'; do
-set firewall "${ver}" forward filter rule 210 action 'drop'
-set firewall "${ver}" forward filter rule 210 description 'Drop IoT to Internet'
-set firewall "${ver}" forward filter rule 210 outbound-interface name 'eth0'
+set firewall "${ver}" forward filter rule 8010 action 'drop'
+set firewall "${ver}" forward filter rule 8010 description 'Drop IoT to Internet'
+set firewall "${ver}" forward filter rule 8010 outbound-interface name 'eth0'
 done
-set firewall ipv4 forward filter rule 210 source group network-group 'VLAN80'
-set firewall ipv6 forward filter rule 210 source group network-group 'VLAN80_V6'
+set firewall ipv4 forward filter rule 8010 source group network-group 'VLAN80'
+set firewall ipv6 forward filter rule 8010 source group network-group 'VLAN80_V6'
 
-# Rule 220: [Printer] Drop Printer to Internet
-set firewall ipv4 forward filter rule 220 action 'drop'
-set firewall ipv4 forward filter rule 220 description 'Drop IoT to Internet'
-set firewall ipv4 forward filter rule 220 source group network-group 'VLAN81'
-set firewall ipv4 forward filter rule 220 outbound-interface name 'eth0'
+# Rule 8020: [Printer] Drop Printer to Internet
+set firewall ipv4 forward filter rule 8020 action 'drop'
+set firewall ipv4 forward filter rule 8020 description 'Drop IoT to Internet'
+set firewall ipv4 forward filter rule 8020 source group network-group 'VLAN81'
+set firewall ipv4 forward filter rule 8020 outbound-interface name 'eth0'
 
-# Rule 1000: [WireGuard] Allow all forwarding traffic from wg0
+# Rule 9000: [WireGuard] Allow all forwarding traffic from wg0
 for ver in 'ipv4' 'ipv6'; do
-set firewall "${ver}" forward filter rule 1000 action 'accept'
-set firewall "${ver}" forward filter rule 1000 description 'Allow all forwarding traffic from wg0'
-set firewall "${ver}" forward filter rule 1000 inbound-interface name 'wg0'
+set firewall "${ver}" forward filter rule 9000 action 'accept'
+set firewall "${ver}" forward filter rule 9000 description 'Allow all forwarding traffic from wg0'
+set firewall "${ver}" forward filter rule 9000 inbound-interface name 'wg0'
 done
 
-# Rule 9000: [Blackhole] Drop Untracked Inter-VLAN Traffic
+# Rule 9999: [Blackhole] Drop Untracked Inter-VLAN Traffic
 for ver in 'ipv4' 'ipv6'; do
-set firewall "${ver}" forward filter rule 9000 action 'drop'
-set firewall "${ver}" forward filter rule 9000 description 'Drop Untracked Inter-VLAN Traffic'
+set firewall "${ver}" forward filter rule 9999 action 'drop'
+set firewall "${ver}" forward filter rule 9999 description 'Drop Untracked Inter-VLAN Traffic'
 done
-set firewall ipv4 forward filter rule 9000 destination group network-group 'INTERNAL_NETWORKS'
-set firewall ipv6 forward filter rule 9000 destination group network-group 'INTERNAL_NETWORKS_V6'
+set firewall ipv4 forward filter rule 9999 destination group network-group 'INTERNAL_NETWORKS'
+set firewall ipv6 forward filter rule 9999 destination group network-group 'INTERNAL_NETWORKS_V6'
