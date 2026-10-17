@@ -19,9 +19,9 @@ set service dhcp-server shared-network-name VLAN80 subnet 10.80.0.0/16 static-ma
 set service dhcp-server shared-network-name VLAN80 subnet 10.80.0.0/16 static-mapping cam-01 ip-address '10.80.200.10'
 set service dhcp-server shared-network-name VLAN80 subnet 10.80.0.0/16 static-mapping cam-01 mac '98:03:8e:a4:42:a4'
 
-# Lezen Fan (lezen-fan-01)
-set service dhcp-server shared-network-name VLAN80 subnet 10.80.0.0/16 static-mapping lezen-fan-01 ip-address '10.80.10.2'
-set service dhcp-server shared-network-name VLAN80 subnet 10.80.0.0/16 static-mapping lezen-fan-01 mac '70:b8:f6:5c:5d:98'
+# Bedroom 01 Envmon (envmon-bedroom-01)
+set service dhcp-server shared-network-name VLAN80 subnet 10.80.0.0/16 static-mapping envmon-bedroom-01 ip-address '10.80.10.1'
+set service dhcp-server shared-network-name VLAN80 subnet 10.80.0.0/16 static-mapping envmon-bedroom-01 mac 'cc:db:a7:1c:ed:1c'
 
 # Lezen Fan (lezen-fan-01)
 set service dhcp-server shared-network-name VLAN80 subnet 10.80.0.0/16 static-mapping lezen-fan-01 ip-address '10.80.10.2'
