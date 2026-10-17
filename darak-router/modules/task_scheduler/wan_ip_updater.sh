@@ -24,6 +24,9 @@ tee /config/scripts/wan_ip/apply.sh << 'EOF'
 
 source /opt/vyatta/etc/functions/script-template
 
+# Always tear down the config session, whatever path we exit through (prevents leaked unionfs mounts)
+trap 'cli-shell-api teardownSession >/dev/null 2>&1' EXIT
+
 GET=/config/scripts/wan_ip/get.sh
 
 configure
@@ -44,9 +47,11 @@ EOF
 
 # Watch: runs every minute, does nothing unless eth0's addresses differ from the groups.
 tee /config/scripts/wan_ip/watch.sh << 'EOF'
-#!/bin/vbash
+#!/bin/bash
 
-source /opt/vyatta/etc/functions/script-template
+# Skip if a previous run (e.g. a slow commit) is still going
+exec 9>/run/wan_ip_updater.lock
+flock -n 9 || exit 0
 
 GET=/config/scripts/wan_ip/get.sh
 
@@ -54,7 +59,8 @@ differs() {
   local type="$1" group="$2" ver="$3"
   local want have
   want="$($GET "$ver" | sort)"
-  have="$(cli-shell-api returnActiveValues firewall group "$type" "$group" | tr -d "'" | tr ' ' '\n' | sort)"
+  have="$(cli-shell-api returnActiveValues firewall group "$type" "$group" address \
+          | tr -d "'" | tr ' ' '\n' | sed '/^$/d' | sort)"
   [[ -n "$want" && "$want" != "$have" ]]
 }
 
